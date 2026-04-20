@@ -1,7 +1,63 @@
 import { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+axios.defaults.withCredentials = true;
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
+
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password: "",
+  });
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      if (isLogin) {
+        // LOGIN
+        const res = await axios.post(
+          "http://localhost:3000/api/auth/login",
+          {
+            email: formData.email,
+            password: formData.password,
+          }
+        );
+
+        localStorage.setItem("user", JSON.stringify(res.data.user));
+
+        alert("Login success");
+        navigate("/dashboard");
+      } else {
+        // SIGNUP
+        await axios.post(
+          "http://localhost:3000/api/auth/register",
+          {
+            username: formData.username,
+            email: formData.email,
+            password: formData.password,
+          }
+        );
+
+        alert("Signup success");
+        setIsLogin(true);
+      }
+    } catch (err) {
+      console.log(err);
+      alert("Something went wrong");
+    }
+  };
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-gray-100">
@@ -89,12 +145,14 @@ export default function AuthPage() {
               <div className="flex-grow h-px bg-gray-200" />
             </div>
 
-            <form className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               {!isLogin && (
                 <div>
                   <label className="text-sm text-gray-600">Full Name</label>
                   <input
                     type="text"
+                    name="username"
+                    onChange={handleChange}
                     placeholder="Enter your name"
                     className="w-full mt-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300"
                   />
@@ -105,6 +163,8 @@ export default function AuthPage() {
                 <label className="text-sm text-gray-600">Email</label>
                 <input
                   type="email"
+                  name="email"
+                  onChange={handleChange}
                   placeholder="Enter your email"
                   className="w-full mt-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300"
                 />
@@ -114,6 +174,8 @@ export default function AuthPage() {
                 <label className="text-sm text-gray-600">Password</label>
                 <input
                   type="password"
+                  name="password"
+                  onChange={handleChange}
                   placeholder="Enter your password"
                   className="w-full mt-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300"
                 />

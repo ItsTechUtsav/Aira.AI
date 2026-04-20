@@ -4,6 +4,9 @@ import Login from "../pages/Login";
 import Dashboard from "../pages/dashboard";
 import InterviewHistory from "../pages/History";
 import Analytic from "../pages/Analytic";
+import Settings from "../pages/Settings";
+import DashboardLayout from "../layouts/DashboardLayout";
+import ProtectedRoute from "./ProtectedRoute";
 
 export default function AppRoutes() {
   return (
@@ -11,9 +14,23 @@ export default function AppRoutes() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/auth" element={<Login />} />
+
+        <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout />
+          </ProtectedRoute>
+        }
+      >
+
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/history" element={<InterviewHistory />} />
         <Route path="/analytics" element={<Analytic />} />
+        <Route path="/settings" element={<Settings />} />
+
+        </Route>
+
       </Routes>
     
   );

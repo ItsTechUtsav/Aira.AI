@@ -31,7 +31,7 @@ const LandingPage = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <NavLink to="/login" className="text-sm font-medium text-gray-300 hover:text-white transition-colors duration-200">Log In</NavLink>
+            <NavLink to="/auth" className="text-sm font-medium text-gray-300 hover:text-white transition-colors duration-200">Log In</NavLink>
             <NavLink to="/get-started" className="bg-[#4D45EC] text-white text-sm px-6 py-2.5 rounded-xl font-semibold shadow-lg hover:bg-[#5C55F2] transition-colors duration-200 flex items-center gap-2">
               Request Demo
               <Sparkles className="w-4 h-4" />
