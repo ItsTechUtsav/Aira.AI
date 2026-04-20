@@ -1,0 +1,12 @@
+FROM node:20
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+EXPOSE 5173
+COPY . .  
+CMD ["npm", "run", "dev"]
+
+
+#Install docker on ur system
+#docker run --rm -p 5173:5173 itstechutsav/frontend:latest
+#if seems already allocated then use another port like 5174:5173
