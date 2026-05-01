@@ -8,6 +8,7 @@ import Analytic from "../pages/Analytic";
 import Settings from "../pages/Settings";
 import DashboardLayout from "../layouts/DashboardLayout";
 import ProtectedRoute from "./ProtectedRoute";
+import InterviewPage from "../pages/interview";
 
 export default function AppRoutes() {
   return (
@@ -29,6 +30,7 @@ export default function AppRoutes() {
         <Route path="/history" element={<InterviewHistory />} />
         <Route path="/analytics" element={<Analytic />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/interview" element={<InterviewPage />} />
       </Route>
     </Routes>
   );

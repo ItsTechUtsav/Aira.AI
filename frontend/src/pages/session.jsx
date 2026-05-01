@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   PlayCircle, 
   Code, 
@@ -12,6 +13,8 @@ import {
 } from 'lucide-react';
 
 const Session = () => {
+  const navigate = useNavigate(); // ✅ MUST be inside component
+
   const [selection, setSelection] = useState({
     role: '',
     difficulty: '',
@@ -28,7 +31,7 @@ const Session = () => {
   ];
 
   const difficulties = ['Beginner', 'Easy', 'Medium', 'Hard', 'Expert'];
-  
+
   const interviewTypes = [
     { id: 'hr', label: 'HR Interview', icon: <Users size={24} /> },
     { id: 'technical', label: 'Technical', icon: <Code size={24} /> },
@@ -49,38 +52,45 @@ const Session = () => {
       </header>
 
       <div className="max-w-4xl space-y-12">
-        {/* 1. Role Selection */}
+
+        {/* ROLE */}
         <section>
-          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">1. Select your Target Role</label>
+          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">
+            1. Select your Target Role
+          </label>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {roles.map((role) => (
               <button
                 key={role.id}
                 onClick={() => handleSelect('role', role.label)}
-                className={`p-6 rounded-xl border-2 text-center transition-all duration-200 flex flex-col items-center gap-3
+                className={`p-6 rounded-xl border-2 flex flex-col items-center gap-3
                   ${selection.role === role.label 
                     ? 'border-[#6366f1] bg-[#6366f1]/5' 
                     : 'border-transparent bg-[#161b2a] hover:border-slate-700'}`}
               >
-                <span className="text-[#6366f1]">{role.icon}</span>
-                <span className="font-medium">{role.label}</span>
+                {role.icon}
+                {role.label}
               </button>
             ))}
           </div>
         </section>
 
-        {/* 2. Difficulty Selection */}
+        {/* DIFFICULTY */}
         <section>
-          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">2. Difficulty Level</label>
+          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">
+            2. Difficulty Level
+          </label>
+
           <div className="flex flex-wrap gap-3">
             {difficulties.map((level) => (
               <button
                 key={level}
                 onClick={() => handleSelect('difficulty', level)}
-                className={`px-6 py-2.5 rounded-full border font-medium transition-all
+                className={`px-6 py-2.5 rounded-full
                   ${selection.difficulty === level 
-                    ? 'bg-[#6366f1] border-[#6366f1] text-white' 
-                    : 'bg-[#161b2a] border-[#1e293b] text-slate-300 hover:border-slate-600'}`}
+                    ? 'bg-[#6366f1] text-white' 
+                    : 'bg-[#161b2a]'}`}
               >
                 {level}
               </button>
@@ -88,33 +98,37 @@ const Session = () => {
           </div>
         </section>
 
-        {/* 3. Interview Type */}
+        {/* TYPE */}
         <section>
-          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">3. Interview Type</label>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">
+            3. Interview Type
+          </label>
+
+          <div className="grid grid-cols-3 gap-4">
             {interviewTypes.map((type) => (
               <button
                 key={type.id}
                 onClick={() => handleSelect('type', type.label)}
-                className={`p-6 rounded-xl border-2 text-center transition-all duration-200 flex flex-col items-center gap-3
+                className={`p-6 rounded-xl border-2 flex flex-col items-center gap-3
                   ${selection.type === type.label 
                     ? 'border-[#6366f1] bg-[#6366f1]/5' 
-                    : 'border-transparent bg-[#161b2a] hover:border-slate-700'}`}
+                    : 'bg-[#161b2a]'}`}
               >
-                <span className="text-[#6366f1]">{type.icon}</span>
-                <span className="font-medium">{type.label}</span>
+                {type.icon}
+                {type.label}
               </button>
             ))}
           </div>
         </section>
 
-        {/* Start Button */}
+        {/* START BUTTON */}
         <button
           disabled={!isFormComplete}
-          className={`w-full py-5 rounded-xl font-bold text-lg flex items-center justify-center gap-3 transition-all
+          onClick={() => navigate('/interview', { state: selection })}
+          className={`w-full py-5 rounded-xl font-bold flex justify-center gap-3
             ${isFormComplete 
-              ? 'bg-[#6366f1] text-white shadow-lg shadow-indigo-500/25 hover:-translate-y-1' 
-              : 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-50'}`}
+              ? 'bg-green-600 hover:bg-green-700 text-white' 
+              : 'bg-gray-700 cursor-not-allowed'}`}
         >
           <PlayCircle size={24} />
           Start Mock Interview
