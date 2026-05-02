@@ -36,6 +36,7 @@ export default function AuthPage() {
         );
 
         localStorage.setItem("user", JSON.stringify(res.data.user));
+        localStorage.setItem("token", res.data.token);
 
         alert("Login success");
         navigate("/dashboard");

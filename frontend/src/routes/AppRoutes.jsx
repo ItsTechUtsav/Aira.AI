@@ -17,6 +17,16 @@ export default function AppRoutes() {
       <Route path="/" element={<Home />} />
       <Route path="/auth" element={<Login />} />
 
+      <Route
+        path="/interview"
+        element={
+          <ProtectedRoute>
+            <InterviewPage />
+          </ProtectedRoute>
+        }
+      />
+
+
       {/* Protected Routes with DashboardLayout */}
       <Route
         element={
@@ -30,7 +40,6 @@ export default function AppRoutes() {
         <Route path="/history" element={<InterviewHistory />} />
         <Route path="/analytics" element={<Analytic />} />
         <Route path="/settings" element={<Settings />} />
-        <Route path="/interview" element={<InterviewPage />} />
       </Route>
     </Routes>
   );

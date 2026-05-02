@@ -1,15 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Mic, Video, PhoneOff, ChevronRight, Clock3, User, ShieldCheck, Briefcase } from 'lucide-react';
+import { Mic, Video, PhoneOff, ChevronRight, Clock3, User, ShieldCheck, Briefcase ,Code} from 'lucide-react';
+import { useLocation } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 
 const InterviewPage = () => {
-    // --- MOCK DATA / PROPS ---
-    const [userName] = useState("Krishna Krishnatrey"); // From your profile
-    const [role] = useState("Full Stack Developer"); 
-    const [type] = useState("Technical");
-    const [difficulty] = useState("Hard");
+    const { state } = useLocation();
+    const navigate = useNavigate();
 
-    // Timer Logic
-    const [timeLeft, setTimeLeft] = useState(120); // 2 minutes example
+    const userName = state?.username;
+    const role = state?.role;
+    const type = state?.type;
+    const difficulty = state?.difficulty;
+    const questions = state?.questions || [];
+    const interviewId = state?.interviewId;
+
+    const [timeLeft, setTimeLeft] = useState(120); 
 
     useEffect(() => {
         if (timeLeft <= 0) return;
@@ -29,6 +34,113 @@ const InterviewPage = () => {
         return "border-green-500 text-green-500 shadow-[0_0_15px_rgba(34,197,94,0.3)]";
     };
 
+
+    const totalTime = 120; 
+    
+    const radius = 28;
+    const stroke = 5;
+    const normalizedRadius = radius - stroke / 2;
+    const circumference = 2 * Math.PI * normalizedRadius;
+    
+    const progress = timeLeft / totalTime;
+    const strokeDashoffset = circumference * (1 - progress);
+    
+    const getColor = () => {
+      if (timeLeft <= 20) return "#ef4444"; 
+      if (timeLeft <= 60) return "#f97316"; 
+      return "#22c55e"; 
+    };
+
+    const [currentIndex, setCurrentIndex] = useState(0);
+
+    const currentQuestion = questions[currentIndex]?.question;
+
+    const [answer, setAnswer] = useState("");
+
+    const submitAnswer = async () => {
+      try {
+        const res = await fetch("http://localhost:3000/api/interview/submit-answer", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+             Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({
+            interviewId,
+            questionindex: currentIndex,
+            answer,
+            timetaken: 120 - timeLeft,
+          }),
+        });
+
+        const data = await res.json();
+        console.log("Answer Feedback:", data);
+
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    const finishInterview = async () => {
+      try {
+        await submitAnswer(); // 
+
+        const res = await fetch("http://localhost:3000/api/interview/finish", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+             Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({ interviewId }),
+        });
+
+        const data = await res.json();
+        console.log("FINAL RESULT:", data);
+
+        navigate("/dashboard");
+    
+
+      } catch (err) {
+        console.log(err);
+    };
+  }
+
+  const handleNext = async () => {
+      await submitAnswer();
+
+      setCurrentIndex(prev => prev + 1);
+      setAnswer("");
+      setTimeLeft(120);
+    };
+
+    const endInterview = async () => {
+          try {
+            
+            await submitAnswer();
+        
+            const res = await fetch("http://localhost:3000/api/interview/finish", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+              body: JSON.stringify({
+                interviewId,
+                status: "pending",
+              }),
+            });
+        
+            const data = await res.json();
+            console.log("ENDED:", data);
+
+            navigate("/dashboard");
+        
+        
+          } catch (err) {
+            console.log(err);
+          }
+        };
+
     return (
         <div className="min-h-screen bg-[#070914] text-gray-100 flex flex-col font-sans">
             
@@ -42,21 +154,35 @@ const InterviewPage = () => {
                         <span className="text-xl font-bold tracking-tight">Aira.ai</span>
                     </div>
                     
+                   
                     {/* Session Badges */}
-                    <div className="hidden md:flex items-center gap-3 pl-8 border-l border-gray-800">
-                        <div className="flex items-center gap-2 bg-[#161b30] px-3 py-1.5 rounded-full border border-indigo-500/30">
-                            <User size={14} className="text-indigo-400" />
-                            <span className="text-sm font-medium">{userName}</span>
-                        </div>
-                        <div className="flex items-center gap-2 bg-[#161b30] px-3 py-1.5 rounded-full border border-gray-700">
-                            <Briefcase size={14} className="text-gray-400" />
-                            <span className="text-sm text-gray-300">{role} • {type}</span>
-                        </div>
-                        <div className="flex items-center gap-2 bg-[#161b30] px-3 py-1.5 rounded-full border border-gray-700">
-                            <ShieldCheck size={14} className="text-orange-400" />
-                            <span className="text-sm text-gray-300">{difficulty}</span>
-                        </div>
+                <div className="hidden md:flex items-center gap-3 pl-8 border-l border-gray-800">
+
+                    {/* User */}
+                    <div className="flex items-center gap-2 bg-[#161b30] px-3 py-1.5 rounded-full border border-indigo-500/30">
+                        <User size={14} className="text-indigo-400" />
+                        <span className="text-sm font-medium">{userName}</span>
                     </div>
+
+                    {/* Role */}
+                    <div className="flex items-center gap-2 bg-[#161b30] px-3 py-1.5 rounded-full border border-gray-700">
+                        <Briefcase size={14} className="text-gray-400" />
+                        <span className="text-sm text-gray-300">{role}</span>
+                    </div>
+
+                    {/* Type */}
+                    <div className="flex items-center gap-2 bg-[#161b30] px-3 py-1.5 rounded-full border border-gray-700">
+                        <Code size={14} className="text-blue-400" />
+                        <span className="text-sm text-gray-300">{type}</span>
+                    </div>
+
+                    {/* Difficulty */}
+                    <div className="flex items-center gap-2 bg-[#161b30] px-3 py-1.5 rounded-full border border-gray-700">
+                        <ShieldCheck size={14} className="text-orange-400" />
+                        <span className="text-sm text-gray-300">{difficulty}</span>
+                    </div>
+
+                </div>
                 </div>
 
                 <div className="flex items-center gap-4">
@@ -101,24 +227,62 @@ const InterviewPage = () => {
                         {/* Header: Question + Timer */}
                         <div className="flex justify-between items-start gap-6 mb-8">
                             <div className="space-y-1">
-                                <span className="text-indigo-400 font-bold text-sm uppercase tracking-wider">Question 01 of 05</span>
+                                <span className="text-indigo-400 font-bold text-sm uppercase tracking-wider">Question {String(currentIndex + 1).padStart(2, "0")} of {questions.length}</span>
                                 <h2 className="text-2xl font-bold leading-tight">
-                                    Can you describe a challenging technical problem you solved in your Aira.AI project?
+                                    {currentQuestion}
                                 </h2>
                             </div>
                             
                             {/* Circular Timer */}
-                            <div className={`flex-shrink-0 w-24 h-24 rounded-full border-4 flex flex-col items-center justify-center transition-all duration-500 bg-[#070914] ${getTimerStyles()}`}>
-                                <Clock3 size={16} className="mb-0.5 opacity-70" />
-                                <span className="text-2xl font-black tracking-tighter">{formatTime(timeLeft)}</span>
-                            </div>
+                            <div className="flex items-center gap-3">
+
+                          {/* Circular Progress (LEFT) */}
+                          <svg
+                            height={radius * 2}
+                            width={radius * 2}
+                            className="rotate-[-90deg]"
+                          >
+                            <circle
+                              stroke="#1f293a"
+                              fill="transparent"
+                              strokeWidth={stroke}
+                              r={radius - stroke / 2}
+                              cx={radius}
+                              cy={radius}
+                            />
+
+                            <circle
+                              stroke={getColor()}
+                              fill="transparent"
+                              strokeWidth={stroke}
+                              strokeDasharray={circumference}
+                              strokeDashoffset={strokeDashoffset}
+                              strokeLinecap="round"
+                              r={radius - stroke / 2}
+                              cx={radius}
+                              cy={radius}
+                              className="transition-all duration-1000 ease-linear"
+                            />
+                          </svg>
+
+                          {/* Digital Time (RIGHT) */}
+                          <span 
+                            className="text-xl font-bold tracking-tight"
+                            style={{ color: getColor() }}
+                          >
+                            {formatTime(timeLeft)}
+                          </span>
+
                         </div>
+                      </div>
 
                         {/* Text Area Input */}
                         <div className="relative flex-1 group">
                             <textarea 
-                                className="w-full h-full bg-[#070914] border border-[#1f293a] rounded-2xl p-6 text-lg text-gray-200 placeholder-gray-600 focus:outline-none focus:border-indigo-500/50 transition-all resize-none shadow-inner"
-                                placeholder="Type your answer here..."
+                              value={answer}
+                              onChange={(e) => setAnswer(e.target.value)}
+                              className="w-full h-full bg-[#070914] border border-[#1f293a] rounded-2xl p-6 text-lg text-gray-200 placeholder-gray-600 focus:outline-none focus:border-indigo-500/50 transition-all resize-none shadow-inner"
+                              placeholder="Type your answer here..."
                             ></textarea>
                             
                             {/* Mic Floating Action */}
@@ -129,15 +293,31 @@ const InterviewPage = () => {
 
                         {/* Footer Actions */}
                         <div className="mt-8 flex items-center justify-between">
-                            <button className="flex items-center gap-2 px-6 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-xl font-bold transition-colors border border-red-500/20">
+                            <button 
+                            onClick={endInterview}
+                            className="flex items-center gap-2 px-6 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-xl font-bold transition-colors border border-red-500/20">
                                 <PhoneOff size={18} />
                                 End Session
                             </button>
                             
-                            <button className="flex items-center gap-2 px-10 py-4 bg-green-600 hover:bg-green-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-green-900/20 hover:-translate-y-0.5">
+                            {currentIndex < questions.length - 1 ? (
+                              <button
+                                onClick={handleNext}
+                                className="flex items-center gap-2 px-10 py-4 bg-green-600 hover:bg-green-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-green-900/20 hover:-translate-y-0.5"
+                              >
                                 Next Question
                                 <ChevronRight size={20} />
-                            </button>
+                              </button>
+                            ) : (
+                              <button
+                                onClick={finishInterview}
+                                className="flex items-center gap-2 px-10 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-indigo-900/20 hover:-translate-y-0.5"
+                              >
+                                Submit Interview
+                                <ChevronRight size={20} />
+                              </button>
+                            )}
+                            
                         </div>
                     </div>
                 </section>

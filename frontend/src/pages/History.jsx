@@ -1,22 +1,57 @@
-import React, { useState } from 'react';
-import { Search, Filter, Briefcase, Calendar, Clock, CheckCircle2 } from 'lucide-react';
 
-// --- Mock Data ---
-const INTERVIEW_DATA = [
-  { id: 1, role: "Senior Frontend Engineer", company: "Google", date: "Apr 14, 2026", score: 92, duration: "24m", status: "Completed", color: "bg-emerald-500" },
-  { id: 2, role: "Product Manager", company: "Stripe", date: "Apr 12, 2026", score: 84, duration: "18m", status: "Completed", color: "bg-indigo-500" },
-  { id: 3, role: "Backend Developer", company: "Meta", date: "Apr 10, 2026", score: 78, duration: "22m", status: "Completed", color: "bg-indigo-500" },
-  { id: 4, role: "Frontend Engineer", company: "Vercel", date: "Apr 05, 2026", score: 88, duration: "20m", status: "Completed", color: "bg-emerald-500" },
-  { id: 5, role: "Fullstack Developer", company: "Airbnb", date: "Mar 28, 2026", score: 82, duration: "25m", status: "Completed", color: "bg-indigo-500" },
-  { id: 6, role: "Software Engineer", company: "Amazon", date: "Mar 22, 2026", score: 75, duration: "15m", status: "Completed", color: "bg-orange-500" },
-];
+import React, { useState, useEffect } from 'react';
+import { Search, Filter, Briefcase, Calendar, Clock, CheckCircle2 } from 'lucide-react';
 
 const InterviewHistory = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [interviews, setInterviews] = useState([]);
+
+  useEffect(() => {
+    fetchInterviews();
+  }, []);
+
+  const fetchInterviews = async () => {
+    try {
+      const res = await fetch("http://localhost:3000/api/interview/my-interviews", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
+      });
+
+      const data = await res.json();
+      setInterviews(data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  // 🎨 color logic
+  const getColor = (score) => {
+    if (score >= 80) return "bg-emerald-500";
+    if (score >= 50) return "bg-indigo-500";
+    return "bg-orange-500";
+  };
+
+  // ⏱ duration logic
+  const getDuration = (interview) => {
+    if (interview.status === "completed") return "10m";
+
+    const answered = interview.questions.filter(q => q.answer).length;
+    return `${answered * 2}m`;
+  };
+
+  // 📊 percentage logic
+  const getPercentage = (interview) => {
+    if (!interview.finalScore) return 0;
+
+    // finalScore is avg (0–10), convert to %
+    return Math.round((interview.finalScore / 10) * 100);
+  };
 
   return (
     <div className="min-h-screen bg-[#0a0f1a] text-slate-300 p-8 font-sans">
-      {/* Header Section */}
+
+      {/* Header */}
       <div className="max-w-6xl mx-auto mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <h1 className="text-3xl font-bold text-white mb-2">Interview History</h1>
@@ -34,6 +69,7 @@ const InterviewHistory = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
+
           <button className="flex items-center gap-2 bg-[#161d2f] border border-slate-800 px-4 py-2 rounded-lg hover:bg-slate-800 transition-colors">
             <Filter className="w-4 h-4" />
             <span>Filter</span>
@@ -41,7 +77,7 @@ const InterviewHistory = () => {
         </div>
       </div>
 
-      {/* Table Section */}
+      {/* Table */}
       <div className="max-w-6xl mx-auto overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
@@ -53,58 +89,80 @@ const InterviewHistory = () => {
               <th className="pb-4 font-semibold">Status</th>
             </tr>
           </thead>
+
           <tbody className="divide-y divide-slate-800/50">
-            {INTERVIEW_DATA.filter(item => 
-              item.role.toLowerCase().includes(searchTerm.toLowerCase()) || 
-              item.company.toLowerCase().includes(searchTerm.toLowerCase())
-            ).map((interview) => (
-              <tr key={interview.id} className="group hover:bg-white/5 transition-colors">
-                <td className="py-5">
-                  <div className="flex items-center gap-4">
-                    <div className="p-2.5 bg-indigo-500/10 rounded-lg border border-indigo-500/20">
-                      <Briefcase className="w-5 h-5 text-indigo-400" />
-                    </div>
-                    <div>
-                      <div className="text-white font-medium">{interview.role}</div>
-                      <div className="text-sm text-slate-500">{interview.company}</div>
-                    </div>
-                  </div>
-                </td>
-                
-                <td className="py-5">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-slate-500" />
-                    <span className="text-sm">{interview.date}</span>
-                  </div>
-                </td>
+            {interviews
+              .filter(item =>
+                item.role.toLowerCase().includes(searchTerm.toLowerCase())
+              )
+              .map((interview) => {
+                const percent = getPercentage(interview);
+                const color = getColor(percent);
 
-                <td className="py-5">
-                  <div className="flex items-center gap-3 min-w-[120px]">
-                    <span className="font-bold text-white text-sm">{interview.score}%</span>
-                    <div className="flex-1 h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                      <div 
-                        className={`h-full ${interview.color} rounded-full`} 
-                        style={{ width: `${interview.score}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                </td>
+                return (
+                  <tr key={interview._id} className="group hover:bg-white/5 transition-colors">
+                    
+                    {/* Role */}
+                    <td className="py-5">
+                      <div className="flex items-center gap-4">
+                        <div className="p-2.5 bg-indigo-500/10 rounded-lg border border-indigo-500/20">
+                          <Briefcase className="w-5 h-5 text-indigo-400" />
+                        </div>
+                        <div>
+                          <div className="text-white font-medium">{interview.role}</div>
+                          <div className="text-sm text-slate-500">{interview.type}</div>
+                        </div>
+                      </div>
+                    </td>
 
-                <td className="py-5">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Clock className="w-4 h-4 text-slate-500" />
-                    {interview.duration}
-                  </div>
-                </td>
+                    {/* Date */}
+                    <td className="py-5">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-slate-500" />
+                        <span className="text-sm">
+                          {new Date(interview.createdAt).toDateString()}
+                        </span>
+                      </div>
+                    </td>
 
-                <td className="py-5">
-                  <div className="flex items-center gap-2 text-xs font-medium bg-emerald-500/10 text-emerald-500 px-2 py-1 rounded-md w-fit border border-emerald-500/20">
-                    <CheckCircle2 className="w-3 h-3" />
-                    {interview.status}
-                  </div>
-                </td>
-              </tr>
-            ))}
+                    {/* Score */}
+                    <td className="py-5">
+                      <div className="flex items-center gap-3 min-w-[120px]">
+                        <span className="font-bold text-white text-sm">{percent}%</span>
+                        <div className="flex-1 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full ${color} rounded-full`}
+                            style={{ width: `${percent}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Duration */}
+                    <td className="py-5">
+                      <div className="flex items-center gap-2 text-sm">
+                        <Clock className="w-4 h-4 text-slate-500" />
+                        {getDuration(interview)}
+                      </div>
+                    </td>
+
+                    {/* Status */}
+                    <td className="py-5">
+                      <div
+                        className={`flex items-center gap-2 text-xs font-medium px-2 py-1 rounded-md w-fit border ${
+                          interview.status === "completed"
+                            ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+                            : "bg-red-500/10 text-red-500 border-red-500/20"
+                        }`}
+                      >
+                        <CheckCircle2 className="w-3 h-3" />
+                        {interview.status}
+                      </div>
+                    </td>
+
+                  </tr>
+                );
+              })}
           </tbody>
         </table>
       </div>

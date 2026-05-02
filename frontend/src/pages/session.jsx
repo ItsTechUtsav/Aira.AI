@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 const Session = () => {
-  const navigate = useNavigate(); // ✅ MUST be inside component
+  const navigate = useNavigate(); 
 
   const [selection, setSelection] = useState({
     role: '',
@@ -43,6 +43,39 @@ const Session = () => {
   };
 
   const isFormComplete = selection.role && selection.difficulty && selection.type;
+
+  const handleStartInterview = async () => {
+  try {
+    const res = await fetch("http://localhost:3000/api/interview/generate-questions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+         Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify(selection),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.log(data.message);
+      return;
+    }
+
+    // 👇 NOW go to interview page WITH backend data
+    navigate("/interview", {
+      state: {
+        ...selection,
+        interviewId: data.interviewId,
+        questions: data.questions,
+        username: data.username,
+      },
+    });
+
+  } catch (error) {
+    console.log("Error:", error);
+  }
+};
 
   return (
     <div className="w-full p-10 text-white font-sans">
@@ -124,7 +157,7 @@ const Session = () => {
         {/* START BUTTON */}
         <button
           disabled={!isFormComplete}
-          onClick={() => navigate('/interview', { state: selection })}
+          onClick={handleStartInterview}
           className={`w-full py-5 rounded-xl font-bold flex justify-center gap-3
             ${isFormComplete 
               ? 'bg-green-600 hover:bg-green-700 text-white' 

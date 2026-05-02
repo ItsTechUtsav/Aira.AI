@@ -11,9 +11,50 @@ const mockResponse = [
   "Explain system design of a basic scalable web application."
 ];
 
+const mockEvaluation = [
+  {
+    confidence: 9,
+    communication: 9,
+    correctness: 9,
+    finalScore: 9,
+    feedback: "Answer lacks clarity and relevant technical explanation."
+  },
+  {
+    confidence: 9,
+    communication: 9,
+    correctness: 9,
+    finalScore: 9,
+    feedback: "Basic idea present but explanation is weak and incomplete."
+  },
+  {
+    confidence: 9,
+    communication: 9,
+    correctness: 9,
+    finalScore: 9,
+    feedback: "Vague response, lacks real example and proper structure."
+  },
+  {
+    confidence: 9,
+    communication: 9,
+    correctness: 9,
+    finalScore: 9,
+    feedback: "Does not address performance optimization clearly."
+  },
+  {
+    confidence: 9,
+    communication: 9,
+    correctness: 9,
+    finalScore: 9,
+    feedback: "System design explanation is unclear and incomplete."
+  }
+];
+
 export const generateQuestions = async (req, res) => {
   try {
+
+
     const { role, difficulty, type } = req.body;
+
 
     if (!role || !difficulty || !type) {
       return res
@@ -22,7 +63,15 @@ export const generateQuestions = async (req, res) => {
     }
 
     // const user = await userModel.findById(req.userId);
-    const user = await userModel.findOne();
+    if (!req.userId) {
+      return res.status(401).json({ message: "Unauthorized: No userId" });
+    }
+
+    const user = await userModel.findById(req.userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -224,18 +273,28 @@ export const submitAnswer = async (req, res) => {
           }
         ];
 
-        const aiResponse = await Askai(messages);
+        let parsed;
 
-        let parsed; 
-
-        try {
-          parsed = JSON.parse(aiResponse);
-        } catch (error) {
-          return res.status(500).json({ message: "Invalid AI response format" });
+        if (USE_MOCK) {
+          parsed = mockEvaluation[questionindex] || {
+          confidence: 1,
+          communication: 1,
+          correctness: 1,
+          finalScore: 1,
+          feedback: "Average answer, needs improvement."
+        };
+        } else {
+          const aiResponse = await Askai(messages);
+        
+          try {
+            parsed = JSON.parse(aiResponse);
+          } catch (error) {
+            return res.status(500).json({ message: "Invalid AI response format" });
+          }
         }
 
         question.answer = answer;
-        question.confidance = parsed.confidence;
+        question.confidence = parsed.confidence;
         question.communication = parsed.communication;
         question.correctness = parsed.correctness;
         question.score = parsed.finalScore;
@@ -256,7 +315,7 @@ export const submitAnswer = async (req, res) => {
 
 export const finishInterview = async (req, res) => {
   try{
-    const { interviewId } = req.body;
+    const { interviewId, status } = req.body;
 
     const interview = await interviewModel.findById(interviewId);
 
@@ -273,7 +332,7 @@ export const finishInterview = async (req, res) => {
 
     interview.questions.forEach(q => {
       totalscore += q.score;
-      totalconfidence += q.confidance;
+      totalconfidence += q.confidence;
       totalcommunication += q.communication;
       totalcorrectness += q.correctness;
     });
@@ -295,7 +354,7 @@ export const finishInterview = async (req, res) => {
     : 0;
 
     interview.finalScore = finalscore;
-    interview.status = "completed";
+    interview.status = status ||"completed";
 
     await interview.save();
 
@@ -309,7 +368,7 @@ export const finishInterview = async (req, res) => {
         question: q.question,
         score: q.score || 0,
         feedback: q.feedback || "",
-        confidence: q.confidance || 0,
+        confidence: q.confidence || 0,
         communication: q.communication || 0,
         correctness: q.correctness || 0,
       })) 
@@ -322,5 +381,17 @@ export const finishInterview = async (req, res) => {
 
   } catch (error) {
     return res.status(500).json({ message: "Error finishing interview"});
+  }
+};
+
+export const getUserInterviews = async (req, res) => {
+  try {
+    const interviews = await interviewModel
+      .find({ userId: req.userId })
+      .sort({ createdAt: -1 });
+
+    res.json(interviews);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching interviews" });
   }
 };
