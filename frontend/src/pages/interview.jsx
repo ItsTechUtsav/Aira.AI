@@ -16,10 +16,34 @@ const InterviewPage = () => {
 
     const [timeLeft, setTimeLeft] = useState(120); 
 
+    const handleTimeUp = async () => {
+      await submitAnswer();
+
+      setTimeLeft(120);
+
+      setAnswer("");
+
+      if (currentIndex < questions.length - 1) {
+        setCurrentIndex(prev => prev + 1);
+      } else {
+        await finishInterview();
+      }
+    };
+
     useEffect(() => {
-        if (timeLeft <= 0) return;
-        const timerId = setInterval(() => setTimeLeft(t => t - 1), 1000);
-        return () => clearInterval(timerId);
+      if (timeLeft <= 0) return;
+
+      const timerId = setInterval(() => {
+        setTimeLeft(prev => prev - 1);
+      }, 1000);
+    
+      return () => clearInterval(timerId);
+    }, []);
+
+    useEffect(() => {
+      if (timeLeft === 0) {
+        handleTimeUp();
+      }
     }, [timeLeft]);
 
     const formatTime = (seconds) => {
@@ -141,6 +165,75 @@ const InterviewPage = () => {
           }
         };
 
+        const recognitionRef = React.useRef(null);
+        const [isListening, setIsListening] = useState(false);
+        const transcriptBuffer = React.useRef("");
+            
+        const startMic = () => {
+          transcriptBuffer.current = "";
+                
+          const SpeechRecognition =
+            window.SpeechRecognition || window.webkitSpeechRecognition;
+                
+          if (!SpeechRecognition) {
+            alert("Speech recognition not supported");
+            return;
+          }
+        
+          recognitionRef.current = new SpeechRecognition();
+          recognitionRef.current.continuous = true;
+          recognitionRef.current.interimResults = true;
+          recognitionRef.current.lang = "en-US";
+        
+          recognitionRef.current.onresult = (event) => {
+            let finalText = "";
+          
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+              const result = event.results[i];
+            
+              if (result.isFinal) {
+                finalText += result[0].transcript + " ";
+              }
+            }
+          
+            if (finalText.trim()) {
+              transcriptBuffer.current += finalText;
+              setAnswer(transcriptBuffer.current);
+            }
+          };
+        
+          recognitionRef.current.start();
+          setIsListening(true);
+        };
+
+      const stopMic = () => {
+        if (recognitionRef.current) {
+          recognitionRef.current.stop();
+        }
+        setIsListening(false);
+      };
+      
+      const toggleMic = () => {
+        if (isListening) stopMic();
+        else startMic();
+      };
+
+      const speakQuestion = (text) => {
+        const speech = new SpeechSynthesisUtterance(text);
+
+        speech.lang = "en-US";
+        speech.rate = 0.95; 
+        speech.pitch = 1;
+
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(speech);
+      };
+      useEffect(() => {
+        if (currentQuestion) {
+          speakQuestion(currentQuestion);
+        }
+      }, [currentIndex]);
+
     return (
         <div className="min-h-screen bg-[#070914] text-gray-100 flex flex-col font-sans">
             
@@ -190,7 +283,7 @@ const InterviewPage = () => {
                         Help & Support
                     </button>
                     <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center font-bold border-2 border-[#1f293a]">
-                        K
+                        {userName[0].toUpperCase()}
                     </div>
                 </div>
             </header>
@@ -286,9 +379,14 @@ const InterviewPage = () => {
                             ></textarea>
                             
                             {/* Mic Floating Action */}
-                            <button className="absolute bottom-6 right-6 w-14 h-14 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl flex items-center justify-center shadow-lg hover:scale-105 transition-all">
-                                <Mic size={24} />
-                            </button>
+                            <button
+                            onClick={toggleMic}
+                            className={`absolute bottom-6 right-6 w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg hover:scale-105 transition-all ${
+                              isListening ? "bg-red-500" : "bg-indigo-600 hover:bg-indigo-500"
+                            }`}
+                          >
+                            <Mic size={24} className={isListening ? "animate-pulse" : ""} />
+                          </button>
                         </div>
 
                         {/* Footer Actions */}
