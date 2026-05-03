@@ -1,11 +1,11 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+
 axios.defaults.withCredentials = true;
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
-
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -23,34 +23,22 @@ export default function AuthPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       if (isLogin) {
-        // LOGIN
-        const res = await axios.post(
-          "http://localhost:3000/api/auth/login",
-          {
-            email: formData.email,
-            password: formData.password,
-          }
-        );
-
+        const res = await axios.post("http://localhost:3000/api/auth/login", {
+          email: formData.email,
+          password: formData.password,
+        });
         localStorage.setItem("user", JSON.stringify(res.data.user));
         localStorage.setItem("token", res.data.token);
-
         alert("Login success");
         navigate("/dashboard");
       } else {
-        // SIGNUP
-        await axios.post(
-          "http://localhost:3000/api/auth/register",
-          {
-            username: formData.username,
-            email: formData.email,
-            password: formData.password,
-          }
-        );
-
+        await axios.post("http://localhost:3000/api/auth/register", {
+          username: formData.username,
+          email: formData.email,
+          password: formData.password,
+        });
         alert("Signup success");
         setIsLogin(true);
       }
@@ -61,77 +49,81 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gray-100">
+    // Main Container with the dark background from the image
+    <div className="min-h-screen bg-[#020617] text-white selection:bg-indigo-500/30">
       
-      {/* Navbar */}
-      <div className="w-full px-8 py-4 flex justify-between items-center bg-white/70 backdrop-blur-md border-b">
-        <h1 className="text-xl font-semibold text-gray-900">Aira.AI</h1>
-        <div className="space-x-6 text-sm text-gray-600">
-          <button className="hover:text-gray-900">About</button>
-          <button className="hover:text-gray-900">Features</button>
-          <button className="hover:text-gray-900">Contact</button>
+      {/* Navbar - Styled like the screenshot */}
+      <nav className="w-full px-8 py-4 flex justify-between items-center border-b border-white/5 bg-[#020617]/80 backdrop-blur-md sticky top-0 z-50">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-indigo-600 rounded flex items-center justify-center">
+             <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 2L4 20h16L12 2z"/></svg>
+          </div>
+          <h1 className="text-xl font-bold tracking-tight">Aira<span className="text-indigo-500">.AI</span></h1>
         </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 min-h-[calc(100vh-64px)]">
-        {/* Left Side */}
-        <div className="hidden md:flex flex-col justify-between bg-gray-900 text-white p-12 relative">
-                    <div>
-            <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center shadow-sm">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2L4 20h16L12 2z" fill="#111"/>
-              </svg>
-            </div>
-            <h1 className="text-3xl font-semibold tracking-tight">Aira.AI</h1>
-          </div>
-            <p className="text-gray-300 text-sm max-w-sm">
-              Smart AI-powered interview platform to help you practice,
-              analyze, and improve your performance.
-            </p>
-          </div>
-
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-medium">AI Interviews</h3>
-              <p className="text-sm text-gray-400">
-                Practice real interview scenarios powered by AI.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-medium">Instant Feedback</h3>
-              <p className="text-sm text-gray-400">
-                Get detailed analysis on your answers.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-medium">Performance Tracking</h3>
-              <p className="text-sm text-gray-400">
-                Track your growth and improve continuously.
-              </p>
-            </div>
-          </div>
-
-          <p className="text-xs text-gray-500">© 2026 Aira.AI</p>
+        <div className="hidden md:flex space-x-8 text-sm font-medium text-gray-400">
+          <button className="hover:text-white transition">Platform</button>
+          <button className="hover:text-white transition">Features</button>
+          <button className="hover:text-white transition">Use Cases</button>
+          <button className="hover:text-white transition">Pricing</button>
         </div>
+        <button className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2 rounded-lg text-sm font-medium transition shadow-lg shadow-indigo-500/20">
+          Request Demo
+        </button>
+      </nav>
 
-        {/* Right Side */}
-        <div className="flex items-center justify-center px-4">
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
-            <h2 className="text-2xl font-semibold text-gray-800 text-center mb-2">
-              {isLogin ? "Login to Aira.AI" : "Create your account"}
+      <div className="grid grid-cols-1 md:grid-cols-2 min-h-[calc(100vh-73px)]">
+        
+        {/* Left Side: Marketing Content */}
+        <div className="hidden md:flex flex-col justify-center p-16 relative overflow-hidden">
+          {/* Subtle background glow to match the landing page */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-600/20 rounded-full blur-[120px]" />
+          
+          <div className="relative z-10">
+            <span className="px-3 py-1 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-400 text-xs font-medium mb-6 inline-block uppercase tracking-wider">
+              Now powered by Aira Foundation Model
+            </span>
+            <h2 className="text-5xl font-bold leading-tight mb-6">
+              Master Every <span className="text-indigo-500 text-glow">Interview</span> With AI Precision.
             </h2>
-            <p className="text-sm text-gray-500 text-center mb-6">
-              {isLogin
-                ? "Welcome back. Please enter your details."
-                : "Start your AI interview journey today."}
+            <p className="text-gray-400 text-lg max-w-md leading-relaxed mb-10">
+              Train with specialized AI interviewers, get instantly actionable feedback, and visualize your progress.
             </p>
 
-            {/* Google Button */}
-            <button className="w-full flex items-center justify-center gap-2 border py-2 rounded-lg text-sm hover:bg-gray-50 transition mb-4">
-              <svg className="w-4 h-4" viewBox="0 0 48 48">
+            <div className="space-y-6">
+              {[
+                { title: "AI Interviews", desc: "Realistic scenarios for any role." },
+                { title: "Instant Feedback", desc: "Actionable insights after every session." },
+                { title: "Performance Tracking", desc: "Watch your confidence grow with data." }
+              ].map((item, i) => (
+                <div key={i} className="flex items-start gap-4">
+                  <div className="mt-1 w-5 h-5 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-500">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-white">{item.title}</h4>
+                    <p className="text-sm text-gray-500">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Right Side: Auth Form */}
+        <div className="flex items-center justify-center p-6 relative">
+          <div className="w-full max-w-md bg-white/5 border border-white/10 backdrop-blur-xl rounded-3xl p-8 shadow-2xl">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-bold mb-2">
+                {isLogin ? "Welcome Back" : "Create Account"}
+              </h2>
+              <p className="text-gray-400 text-sm">
+                {isLogin ? "Ready to start your next practice session?" : "Join Aira.AI and start mastering your interviews."}
+              </p>
+            </div>
+
+            {/* Google Button - Updated styling */}
+            <button className="w-full flex items-center justify-center gap-3 bg-white/10 hover:bg-white/15 border border-white/10 py-2.5 rounded-xl text-sm font-medium transition mb-6">
+              <svg className="w-5 h-5" viewBox="0 0 48 48">
                 <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.91 2.36 30.37 0 24 0 14.82 0 6.73 5.2 2.69 12.74l7.98 6.2C12.36 13.12 17.74 9.5 24 9.5z"/>
                 <path fill="#34A853" d="M46.5 24c0-1.64-.15-3.21-.43-4.71H24v9.01h12.7c-.55 2.96-2.2 5.47-4.68 7.15l7.24 5.63C43.93 36.98 46.5 30.94 46.5 24z"/>
                 <path fill="#4A90E2" d="M10.67 28.94A14.5 14.5 0 019.5 24c0-1.72.3-3.38.83-4.94l-7.98-6.2A23.94 23.94 0 000 24c0 3.87.92 7.52 2.55 10.74l8.12-5.8z"/>
@@ -140,68 +132,74 @@ export default function AuthPage() {
               Continue with Google
             </button>
 
-            <div className="flex items-center my-4">
-              <div className="flex-grow h-px bg-gray-200" />
-              <span className="px-3 text-xs text-gray-400">or</span>
-              <div className="flex-grow h-px bg-gray-200" />
+            <div className="flex items-center gap-4 mb-6">
+              <div className="flex-grow h-px bg-white/10" />
+              <span className="text-xs text-gray-500 uppercase tracking-widest">or</span>
+              <div className="flex-grow h-px bg-white/10" />
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-5">
               {!isLogin && (
                 <div>
-                  <label className="text-sm text-gray-600">Full Name</label>
+                  <label className="text-xs font-semibold text-gray-400 uppercase ml-1">Full Name</label>
                   <input
                     type="text"
                     name="username"
                     onChange={handleChange}
-                    placeholder="Enter your name"
-                    className="w-full mt-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300"
+                    placeholder="John Doe"
+                    className="w-full mt-1.5 px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition placeholder:text-gray-600"
                   />
                 </div>
               )}
 
               <div>
-                <label className="text-sm text-gray-600">Email</label>
+                <label className="text-xs font-semibold text-gray-400 uppercase ml-1">Email Address</label>
                 <input
                   type="email"
                   name="email"
                   onChange={handleChange}
-                  placeholder="Enter your email"
-                  className="w-full mt-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300"
+                  placeholder="name@company.com"
+                  className="w-full mt-1.5 px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition placeholder:text-gray-600"
                 />
               </div>
 
               <div>
-                <label className="text-sm text-gray-600">Password</label>
+                <label className="text-xs font-semibold text-gray-400 uppercase ml-1">Password</label>
                 <input
                   type="password"
                   name="password"
                   onChange={handleChange}
-                  placeholder="Enter your password"
-                  className="w-full mt-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300"
+                  placeholder="••••••••"
+                  className="w-full mt-1.5 px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition placeholder:text-gray-600"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full bg-gray-900 text-white py-2 rounded-lg hover:bg-gray-800 transition"
+                className="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-xl font-semibold transition-all transform active:scale-[0.98] shadow-lg shadow-indigo-600/20 mt-2"
               >
-                {isLogin ? "Login" : "Sign Up"}
+                {isLogin ? "Sign In" : "Create Account"}
               </button>
             </form>
 
-            <p className="text-sm text-gray-500 text-center mt-6">
-              {isLogin ? "Don't have an account?" : "Already have an account?"}
+            <p className="text-sm text-gray-400 text-center mt-8">
+              {isLogin ? "New to Aira.AI?" : "Already a member?"}
               <button
                 onClick={() => setIsLogin(!isLogin)}
-                className="ml-2 text-gray-800 font-medium hover:underline"
+                className="ml-2 text-indigo-400 font-semibold hover:text-indigo-300 transition underline underline-offset-4"
               >
-                {isLogin ? "Sign up" : "Login"}
+                {isLogin ? "Create an account" : "Sign in here"}
               </button>
             </p>
           </div>
         </div>
       </div>
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        .text-glow {
+          text-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+        }
+      `}} />
     </div>
   );
 }
