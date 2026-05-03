@@ -31,6 +31,9 @@ const interviewSchema = new mongoose.Schema({
     },
     questions: [questionSchema],
     finalScore: { type: Number, default: 0 },
+    summary: String,
+    strengths: [String],
+    weaknesses: [String],
     status: {
         type: String,
         enum: ['pending', 'completed'],

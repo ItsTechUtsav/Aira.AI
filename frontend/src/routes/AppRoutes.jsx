@@ -9,6 +9,7 @@ import Settings from "../pages/Settings";
 import DashboardLayout from "../layouts/DashboardLayout";
 import ProtectedRoute from "./ProtectedRoute";
 import InterviewPage from "../pages/interview";
+import ReportPage from "../pages/Report";
 
 export default function AppRoutes() {
   return (
@@ -25,6 +26,8 @@ export default function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
+      <Route path="/report/:id" element={<ProtectedRoute><ReportPage /></ProtectedRoute>} />
 
 
       {/* Protected Routes with DashboardLayout */}

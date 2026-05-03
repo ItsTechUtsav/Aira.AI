@@ -121,7 +121,11 @@ const InterviewPage = () => {
         const data = await res.json();
         console.log("FINAL RESULT:", data);
 
-        navigate("/dashboard");
+        if (data.interviewId) {
+          navigate(`/report/${data.interviewId}`);
+        } else {
+          alert(data.message);
+        }
     
 
       } catch (err) {
@@ -228,11 +232,14 @@ const InterviewPage = () => {
         window.speechSynthesis.cancel();
         window.speechSynthesis.speak(speech);
       };
+
       useEffect(() => {
         if (currentQuestion) {
           speakQuestion(currentQuestion);
         }
       }, [currentIndex]);
+
+
 
     return (
         <div className="min-h-screen bg-[#070914] text-gray-100 flex flex-col font-sans">

@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link , useNavigate } from 'react-router-dom';
 import { 
   PlayCircle, 
   Search, 
@@ -15,7 +15,9 @@ import {
   ExternalLink
 } from 'lucide-react';
 
+
 // Animations for premium feel
+
 const containerVariant = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.08 } }
@@ -28,6 +30,8 @@ const itemVariant = {
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+  
 
   useEffect(() => {
     axios.get("http://localhost:3000/api/auth/me", { withCredentials: true })
@@ -144,7 +148,7 @@ const Dashboard = () => {
               <table className="w-full text-left border-separate border-spacing-0">
                 <thead>
                   <tr className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">
-                    <th className="px-6 py-4">Role & Company</th>
+                    <th className="px-6 py-4">Role</th>
                     <th className="px-6 py-4">Date</th>
                     <th className="px-6 py-4 text-center">Score</th>
                     <th className="px-6 py-4 text-right">Action</th>
@@ -198,10 +202,14 @@ const Dashboard = () => {
                           </td>
                                 
                           <td className="px-6 py-4 text-right">
-                            <button className="px-3 py-1.5 bg-[#1f2937] text-[11px] font-bold text-slate-300 rounded-lg border border-slate-700 hover:bg-slate-700 transition-all">
+                            <button className="px-3 py-1.5 bg-[#1f2937] text-[11px] font-bold text-slate-300 rounded-lg border border-slate-700 hover:bg-slate-700 transition-all"
+                            onClick={() => navigate(`/report/${row._id}`)}
+                            >
                               Review
                             </button>
                           </td>
+
+                          
                         </tr>
                       );
                     })}

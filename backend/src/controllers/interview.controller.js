@@ -314,55 +314,110 @@ export const submitAnswer = async (req, res) => {
 
 
 export const finishInterview = async (req, res) => {
-  try{
+  try {
     const { interviewId, status } = req.body;
 
     const interview = await interviewModel.findById(interviewId);
 
-    if(!interview){
-      return res.status(404).json({ message: "Interview not found"});
+    if (!interview) {
+      return res.status(404).json({ message: "Interview not found" });
     }
 
-    const totalquestions = interview.questions.length;
+    if (interview.status === "completed") {
+      return res.status(400).json({ message: "Interview already completed" });
+    }
 
+    const answeredQuestions = interview.questions.filter(q => q.answer);
+    const totalquestions = answeredQuestions.length;
+    
     let totalscore = 0;
     let totalconfidence = 0;
     let totalcommunication = 0;
     let totalcorrectness = 0;
 
-    interview.questions.forEach(q => {
-      totalscore += q.score;
-      totalconfidence += q.confidence;
-      totalcommunication += q.communication;
-      totalcorrectness += q.correctness;
+    answeredQuestions.forEach(q => {
+      totalscore += q.score || 0;
+      totalconfidence += q.confidence || 0;
+      totalcommunication += q.communication || 0;
+      totalcorrectness += q.correctness || 0;
     });
 
-    const finalscore = totalquestions
-    ? totalscore / totalquestions
-    : 0;
+    const finalscore = totalquestions ? totalscore / totalquestions : 0;
+    const avgconfidence = totalquestions ? totalconfidence / totalquestions : 0;
+    const avgcommunication = totalquestions ? totalcommunication / totalquestions : 0;
+    const avgcorrectness = totalquestions ? totalcorrectness / totalquestions : 0;
 
-    const avgconfidence = totalquestions
-    ? totalconfidence / totalquestions
-    : 0;  
+    let performance = "Needs Improvement";
 
-    const avgcommunication = totalquestions
-    ? totalcommunication / totalquestions
-    : 0;  
+    if (finalscore >= 8) performance = "Excellent";
+    else if (finalscore >= 6) performance = "Good";
+    else if (finalscore >= 4) performance = "Average";
 
-    const avgcorrectness = totalquestions
-    ? totalcorrectness / totalquestions
-    : 0;
+    const reportPrompt = [
+      {
+        role: "system",
+        content: `
+You are an expert interview evaluator.
+
+Return JSON:
+{
+  "summary": "2-3 lines overall performance",
+  "strengths": ["point1", "point2"],
+  "weaknesses": ["point1", "point2"]
+}
+`
+      },
+      {
+        role: "user",
+        content: interview.questions.map((q, i) => 
+            `Q${i+1}: ${q.question}
+             Answer: ${q.answer}
+             Score: ${q.score}
+             Feedback: ${q.feedback}`
+          ).join("\n\n")
+       }
+      ];
+
+    let reportData;
+
+    if (USE_MOCK) {
+      reportData = {
+        summary: "Good overall performance but needs better technical depth.",
+        strengths: ["Clear communication", "Good confidence"],
+        weaknesses: ["Lacks detailed examples", "Weak technical explanations"]
+      };
+    } else {
+      const aiRes = await Askai(reportPrompt);
+
+      try {
+        reportData = JSON.parse(aiRes);
+      } catch (err) {
+        reportData = {
+          summary: "Unable to generate detailed summary.",
+          strengths: [],
+          weaknesses: []
+        };
+      }
+    }
 
     interview.finalScore = finalscore;
-    interview.status = status ||"completed";
+    interview.status = status || "completed";
+    interview.summary = reportData.summary;
+    interview.strengths = reportData.strengths;
+    interview.weaknesses = reportData.weaknesses;
 
     await interview.save();
 
     return res.status(200).json({
-      finalscore: Number(finalscore.toFixed(1)),
+      interviewId: interview._id,
+      finalScore: Number(finalscore.toFixed(1)),
       confidence: Number(avgconfidence.toFixed(1)),
       communication: Number(avgcommunication.toFixed(1)),
       correctness: Number(avgcorrectness.toFixed(1)),
+      summary: interview.summary,
+      strengths: interview.strengths,
+      weaknesses: interview.weaknesses,
+      performance,
 
       questionWiseScore: interview.questions.map(q => ({
         question: q.question,
@@ -371,16 +426,11 @@ export const finishInterview = async (req, res) => {
         confidence: q.confidence || 0,
         communication: q.communication || 0,
         correctness: q.correctness || 0,
-      })) 
-
+      }))
     });
 
-
-
-    
-
   } catch (error) {
-    return res.status(500).json({ message: "Error finishing interview"});
+    return res.status(500).json({ message: "Error finishing interview" });
   }
 };
 
@@ -388,10 +438,59 @@ export const getUserInterviews = async (req, res) => {
   try {
     const interviews = await interviewModel
       .find({ userId: req.userId })
+      .select("role finalScore createdAt status")
       .sort({ createdAt: -1 });
 
     res.json(interviews);
   } catch (err) {
     res.status(500).json({ message: "Error fetching interviews" });
+  }
+};
+
+export const getInterviewReport = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const interview = await interviewModel.findById(id);
+
+    if (!interview) {
+      return res.status(404).json({ message: "Interview not found" });
+    }
+
+    if (interview.userId.toString() !== req.userId) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    return res.json({
+      role: interview.role,
+      difficulty: interview.difficulty,
+      type: interview.type,
+      finalScore: interview.finalScore,
+      performance: interview.finalScore >= 8
+        ? "Excellent"
+        : interview.finalScore >= 6
+        ? "Good"
+        : interview.finalScore >= 4
+        ? "Average"
+        : "Needs Improvement",
+      summary: interview.summary,
+      strengths: interview.strengths,
+      weaknesses: interview.weaknesses,
+      questions: interview.questions.map(q => ({
+        question: q.question,
+        answer: q.answer,
+        score: q.score,
+        feedback: q.feedback,
+        confidence: q.confidence,
+        communication: q.communication,
+        correctness: q.correctness
+      })),
+      createdAt: interview.createdAt
+    });
+
+    
+
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching report" });
   }
 };
