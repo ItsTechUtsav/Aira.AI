@@ -34,7 +34,11 @@ const Dashboard = () => {
   
 
   useEffect(() => {
-    axios.get("http://localhost:3000/api/auth/me", { withCredentials: true })
+    axios.get("http://localhost:3000/api/auth/me", {
+       headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`
+      }
+      })
       .then(res => setUser(res.data))
       .catch(() => window.location.href = "/auth");
   }, []);
