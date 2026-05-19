@@ -66,31 +66,48 @@ const Dashboard = () => {
     <div className="flex-1 min-h-screen bg-[#0b0f1a] overflow-y-auto custom-scrollbar">
       {/* Top Navigation Bar */}
       <header className="sticky top-0 z-20 bg-[#0b0f1a]/80 backdrop-blur-md border-b border-slate-800/50 px-8 py-4 flex items-center justify-between">
-        <div className="relative w-full max-w-md">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-          <input 
-            type="text" 
-            placeholder="Search mock interviews, feedback..." 
-            className="w-full bg-[#111827] border border-slate-800 rounded-lg py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500/50 transition-all text-slate-200"
-          />
+        <div>
+          <h1 className="text-2xl font-bold text-white tracking-tight">
+            Dashboard
+          </h1>
         </div>
 
-        <div className="flex items-center gap-6">
-          <button className="relative p-2 text-slate-400 hover:text-white transition-colors">
-            <Bell size={20} />
-            <span className="absolute top-2 right-2 w-2 h-2 bg-indigo-500 rounded-full border-2 border-[#0b0f1a]" />
-          </button>
-          
-          <div className="flex items-center gap-3 border-l border-slate-800 pl-6">
-            <div className="text-right hidden sm:block">
-              <p className="text-sm font-bold text-white leading-none">{user?.username || "test_2"}</p>
-              <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-tighter mt-1">Pro Plan</p>
+        <div className="flex items-center gap-5">
+            {/* AI Status */}
+            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-800 bg-[#111827]">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+
+              <span className="text-xs font-medium text-slate-400">
+                AI Systems Online
+              </span>
             </div>
-            <div className="h-9 w-9 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-indigo-500/20">
-              {user?.username?.charAt(0).toUpperCase() || "T"}
+
+            {/* Bell */}
+            <button
+              className="p-2 rounded-xl border border-slate-800 bg-[#111827] text-slate-500 hover:text-white hover:border-slate-700 transition-all"
+            >
+              <Bell size={18} />
+            </button>
+
+            {/* User */}
+            <div className="flex items-center gap-3 border-l border-slate-800 pl-5">
+
+              <div className="text-right hidden sm:block">
+                <p className="text-sm font-bold text-white leading-none">
+                  {user?.username || "test_2"}
+                </p>
+
+                <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-tighter mt-1">
+                  Basic Plan
+                </p>
+              </div>
+
+              <div className="h-9 w-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-indigo-500/20">
+                {user?.username?.charAt(0).toUpperCase() || "T"}
+              </div>
+
             </div>
           </div>
-        </div>
       </header>
 
       {/* Content Area */}
@@ -98,9 +115,12 @@ const Dashboard = () => {
         
         {/* Welcome Section */}
         <div className="mb-10">
-          <h1 className="text-3xl font-bold text-white tracking-tight">Overview</h1>
-          <p className="text-slate-400 mt-1">
-            Welcome back <span className="text-slate-200 font-semibold">{user?.username || "test_2"}</span>. You have 2 mock interviews scheduled for this week.
+          <h1 className="text-3xl font-bold text-white tracking-tight">
+            Welcome back, <span className="text-indigo-400">{user?.username || "test_2"}</span>
+          </h1>
+
+          <p className="text-slate-400 mt-2">
+            Track your interview performance, analytics, and AI practice sessions.
           </p>
         </div>
 
@@ -201,12 +221,21 @@ const Dashboard = () => {
                             </div>
                           </td>
                                 
-                          <td className="px-6 py-4 text-right">
-                            <button className="px-3 py-1.5 bg-[#1f2937] text-[11px] font-bold text-slate-300 rounded-lg border border-slate-700 hover:bg-slate-700 transition-all"
-                            onClick={() => navigate(`/report/${row._id}`)}
-                            >
-                              Review
-                            </button>
+                          <td className="px-6 py-4">
+                            <div className="flex justify-end">
+                              {row.status === "completed" ? (
+                                <button
+                                  onClick={() => navigate(`/report/${row._id}`)}
+                                  className="px-4 py-2 text-xs font-semibold bg-emerald-500/10 text-emerald-400 border-emerald-500/20 rounded-xl hover:bg-slate-700 hover:border-slate-600 transition-all duration-200"
+                                >
+                                  Review
+                                </button>
+                              ) : (
+                                <div className="px-4 py-2 text-xs font-medium bg-orange-500/10 text-orange-400 border-orange-500/20 rounded-xl">
+                                  Pending
+                                </div>
+                              )}
+                            </div>
                           </td>
 
                           
@@ -232,7 +261,10 @@ const Dashboard = () => {
                 <p className="text-indigo-100 text-xs mb-6 leading-relaxed opacity-90">
                   Your AI twin is ready to simulate a technical interview for Amazon.
                 </p>
-                <button className="w-full bg-white text-indigo-600 font-bold py-3 rounded-xl hover:bg-indigo-50 transition-all flex items-center justify-center gap-2 shadow-lg">
+                <button
+                  onClick={() => navigate("/practice")}
+                  className="w-full bg-white text-indigo-600 font-bold py-3 rounded-xl hover:bg-indigo-50 transition-all flex items-center justify-center gap-2 shadow-lg"
+                >
                   <PlayCircle size={18} /> Start Session
                 </button>
               </div>

@@ -23,8 +23,6 @@ const authMiddleware = (req, res, next) => {
 
     req.userId = decoded.id;
 
-    console.log("REQ USER ID:", req.userId);
-
     next();
   } catch (error) {
     console.log("AUTH ERROR:", error.message);

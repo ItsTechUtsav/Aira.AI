@@ -114,36 +114,44 @@ const Analytic = () => {
     maintainAspectRatio: false,
   };
 
-  // ================= LINE CHART =================
+     // ================= LINE CHART =================
 
-    // 1. Sort interviews by time
-    const sortedInterviews = [...interviews].sort(
+    // 1. Only completed interviews
+    const completedInterviews = interviews.filter(
+      (i) => i.status === "completed"
+    );
+
+    // 2. Sort by created time
+    const sortedInterviews = [...completedInterviews].sort(
       (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
     );
-    
-    // 2. X-axis labels (TIME)
+
+    // 3. Create labels with date + count
+    const dateCount = {};
+
     const labels =
       sortedInterviews.length > 0
         ? sortedInterviews.map((i) => {
             const date = new Date(i.createdAt);
-            return date.toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
+        
+            return date.toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
             });
           })
-        : ["No Data"];
+      : ["No Data"];
         
-    // 3. Y-axis data (SCORE)
+    // 4. Score data
     const userScores =
       sortedInterviews.length > 0
         ? sortedInterviews.map((i) =>
             i.finalScore !== undefined && i.finalScore !== null
               ? i.finalScore * 10
-              : null
+              : 0
           )
         : [0];
         
-    // 4. Chart Data
+    // 5. Chart Data
     const lineChartData = {
       labels,
       datasets: [
@@ -167,8 +175,8 @@ const Analytic = () => {
         },
       ],
     };
-    
-    // 5. Options
+
+    // 6. Chart Options
     const lineChartOptions = {
       scales: {
         x: {
@@ -185,9 +193,36 @@ const Analytic = () => {
           labels: { color: "#94a3b8" },
         },
         tooltip: {
+          backgroundColor: "#312e81",
+          padding: 14,
+          cornerRadius: 12,
+          displayColors: false,
+                
           callbacks: {
+            title: function () {
+              return "";
+            },
+          
             label: function (context) {
-              return `Score: ${context.raw}%`;
+              const interview = sortedInterviews[context.dataIndex];
+            
+              const date = new Date(interview.createdAt);
+            
+              const formattedDate = date.toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+              });
+            
+              const formattedTime = date.toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              });
+            
+              return [
+                `Date: ${formattedDate}`,
+                `Time: ${formattedTime}`,
+                `Score: ${context.raw}%`,
+              ];
             },
           },
         },
@@ -195,7 +230,6 @@ const Analytic = () => {
       responsive: true,
       maintainAspectRatio: false,
     };
-
   // ================= KPI UI =================
 
   const KPI_DATA = [

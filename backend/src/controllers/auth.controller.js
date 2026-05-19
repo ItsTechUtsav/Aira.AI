@@ -102,9 +102,149 @@ async function getMe(req, res) {
     }
 }
 
+async function changeUsername(req, res) {
+  try {
+    const { username } = req.body;
+
+    if (!username) {
+      return res.status(400).json({
+        message: "Username is required",
+      });
+    }
+
+    const user = await userModel.findById(req.userId);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    user.username = username;
+
+    await user.save();
+
+    res.json({
+      message: "Username updated successfully",
+      username: user.username,
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      message: "Server error",
+    });
+  }
+}
+
+async function verifyPassword(req, res) {
+  try {
+    const { oldPassword } = req.body;
+
+    if (!oldPassword) {
+      return res.status(400).json({
+        message: "Password is required",
+      });
+    }
+
+    const user = await userModel.findById(req.userId);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    const isMatch = await bcrypt.compare(
+      oldPassword,
+      user.password
+    );
+
+    if (!isMatch) {
+      return res.status(400).json({
+        message: "Incorrect password",
+      });
+    }
+
+    res.json({
+      message: "Password verified",
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      message: "Server error",
+    });
+  }
+}
+
+async function changePassword(req, res) {
+    try {
+
+    const { newPassword } = req.body;
+
+    if (!newPassword) {
+      return res.status(400).json({
+        message: "New password required",
+      });
+    }
+
+    const user = await userModel.findById(req.userId);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    user.password = hashedPassword;
+
+    await user.save();
+
+    res.json({
+      message: "Password updated successfully",
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      message: "Server error",
+    });
+  }
+}
+
+async function deleteAccount(req, res) {
+   try {
+
+    const user = await userModel.findById(req.userId);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    await userModel.findByIdAndDelete(req.userId);
+
+    res.json({
+      message: "Account deleted successfully",
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      message: "Server error",
+    });
+  }
+
+}
+
+
 module.exports = {
     registerUser,
     loginUser,
-    getMe
+    getMe,
+    changeUsername,
+    changePassword,
+    deleteAccount,
+    verifyPassword
 }
 

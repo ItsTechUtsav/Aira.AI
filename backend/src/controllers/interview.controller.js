@@ -438,7 +438,7 @@ export const getUserInterviews = async (req, res) => {
   try {
     const interviews = await interviewModel
       .find({ userId: req.userId })
-      .select("role finalScore createdAt status")
+      .select("role finalScore createdAt status questions")
       .sort({ createdAt: -1 });
 
     res.json(interviews);
