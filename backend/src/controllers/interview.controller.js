@@ -2,7 +2,7 @@ import {Askai} from "../services/openRouter.service.js";
 import interviewModel from "../models/interview.model.js";
 import userModel from "../models/user.model.js"
 
-const USE_MOCK = false;
+const USE_MOCK = true;
 const mockResponse = [
   "Explain your experience with React and state management in real projects.",
   "How do you handle asynchronous operations in JavaScript applications?",
