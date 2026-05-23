@@ -132,4 +132,7 @@ npm run dev
 - improve error handling and user feedback on frontend
 - add tests for backend controllers and frontend pages
 
-## Contributors 
+## Contributors
+Krishna Krishnatrey(FUll Stack Developer)
+Shamit Gautam(Motivation Engg.)
+Utsav Sharma(DevOps Engg.)
