@@ -14,7 +14,7 @@ const InterviewHistory = () => {
 
   const fetchInterviews = async () => {
     try {
-      const res = await fetch("http://://aira-ai-backend.onrender.com//api/interview/my-interviews", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/interview/my-interviews`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`
         }

@@ -83,7 +83,7 @@ const InterviewPage = () => {
 
     const submitAnswer = async () => {
       try {
-        const res = await fetch("http://://aira-ai-backend.onrender.com//api/interview/submit-answer", {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/interview/submit-answer`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -109,7 +109,7 @@ const InterviewPage = () => {
       try {
         await submitAnswer(); // 
 
-        const res = await fetch("http://://aira-ai-backend.onrender.com//api/interview/finish", {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/interview/finish`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -146,7 +146,7 @@ const InterviewPage = () => {
             
             await submitAnswer();
         
-            const res = await fetch("http://://aira-ai-backend.onrender.com//api/interview/finish", {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/interview/finish`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",

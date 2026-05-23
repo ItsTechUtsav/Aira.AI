@@ -34,7 +34,7 @@ const Dashboard = () => {
   
 
   useEffect(() => {
-    axios.get("http://://aira-ai-backend.onrender.com//api/auth/me", {
+    axios.get(`${import.meta.env.VITE_API_URL}/api/auth/me`, {
        headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`
       }
@@ -54,7 +54,7 @@ const Dashboard = () => {
 
     useEffect(() => {
       axios
-        .get("http://://aira-ai-backend.onrender.com//api/interview/my-interviews", {
+        .get(`${import.meta.env.VITE_API_URL}/api/interview/my-interviews`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },

@@ -24,7 +24,7 @@ export default function ReportPage() {
     const fetchReport = async () => {
       try {
         const res = await axios.get(
-          `http://://aira-ai-backend.onrender.com//api/interview/report/${id}`,
+          `${import.meta.env.VITE_API_URL}/api/interview/report/${id}`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
