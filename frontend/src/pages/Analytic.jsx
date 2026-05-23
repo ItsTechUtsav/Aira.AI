@@ -34,7 +34,7 @@ const Analytic = () => {
   }, []);
 
   const fetchData = async () => {
-    const res = await fetch("http://localhost:3000/api/interview/my-interviews", {
+    const res = await fetch("http://https://aira-ai-backend.onrender.com//api/interview/my-interviews", {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`
       }

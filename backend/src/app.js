@@ -11,7 +11,7 @@ const app = exprees();
 app.use(exprees.json());
 app.use(cookieParser());
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: 'https://aira-ai-xi.vercel.app',
     credentials: true
 }));
 

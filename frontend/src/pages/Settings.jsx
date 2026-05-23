@@ -21,7 +21,7 @@ const SettingsPage = () => {
 
   // --- Fetch Data from your DB ---
   useEffect(() => {
-    axios.get("http://localhost:3000/api/auth/me", {
+    axios.get("http://https://aira-ai-backend.onrender.com//api/auth/me", {
       withCredentials: true
     })
     .then(res => {
@@ -37,7 +37,7 @@ const SettingsPage = () => {
   const handleUsernameChange = async () => {
   try {
     const res = await axios.put(
-      "http://localhost:3000/api/auth/change-username",
+      "http://https://aira-ai-backend.onrender.com//api/auth/change-username",
       {
         username: newUsername,
       },
@@ -64,7 +64,7 @@ const SettingsPage = () => {
 const handleDeleteAccount = async () => {
   try {
     await axios.delete(
-      "http://localhost:3000/api/auth/delete-account",
+      "http://https://aira-ai-backend.onrender.com//api/auth/delete-account",
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -84,7 +84,7 @@ const handleDeleteAccount = async () => {
 const verifyOldPassword = async () => {
   try {
     await axios.post(
-      "http://localhost:3000/api/auth/verify-password",
+      "http://https://aira-ai-backend.onrender.com//api/auth/verify-password",
       {
         oldPassword,
       },
@@ -104,7 +104,7 @@ const verifyOldPassword = async () => {
 const updatePassword = async () => {
   try {
     await axios.put(
-      "http://localhost:3000/api/auth/change-password",
+      "http://https://aira-ai-backend.onrender.com//api/auth/change-password",
       {
         newPassword,
       },

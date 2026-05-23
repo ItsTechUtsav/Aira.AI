@@ -25,7 +25,7 @@ export default function AuthPage() {
     e.preventDefault();
     try {
       if (isLogin) {
-        const res = await axios.post("http://localhost:3000/api/auth/login", {
+        const res = await axios.post("http://https://aira-ai-backend.onrender.com//api/auth/login", {
           email: formData.email,
           password: formData.password,
         });
@@ -34,7 +34,7 @@ export default function AuthPage() {
         alert("Login success");
         navigate("/dashboard");
       } else {
-        await axios.post("http://localhost:3000/api/auth/register", {
+        await axios.post("http://https://aira-ai-backend.onrender.com//api/auth/register", {
           username: formData.username,
           email: formData.email,
           password: formData.password,
