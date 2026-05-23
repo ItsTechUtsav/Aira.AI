@@ -165,7 +165,7 @@ npm run dev
 ## 👥 Team
 
 - Krishna Krishnatrey — Full Stack Developer
-- Shamit Gautam — Motivation Engineer
+- Shamit Gautam — AI and Backend Engineer
 - Utsav Sharma — DevOps Engineer
 
 ---
