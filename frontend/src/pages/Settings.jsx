@@ -21,17 +21,21 @@ const SettingsPage = () => {
 
   // --- Fetch Data from your DB ---
   useEffect(() => {
-    axios.get(`${import.meta.env.VITE_API_URL}/api/auth/me`, {
-      withCredentials: true
-    })
-    .then(res => {
-      setUser(res.data);
-      setLoading(false);
-    })
-    .catch(() => {
-      window.location.href = "/auth";
-    });
-  }, []);
+  const token = localStorage.getItem("token");
+
+  axios.get(`${import.meta.env.VITE_API_URL}/api/auth/me`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+  .then(res => {
+    setUser(res.data);
+    setLoading(false);
+  })
+  .catch(() => {
+    window.location.href = "/auth";
+  });
+}, []);
 
 
   const handleUsernameChange = async () => {
