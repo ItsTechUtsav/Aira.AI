@@ -112,24 +112,15 @@ cd ../frontend
 npm install
 ```
 
-### 2. Configure backend environment
 
-Create a `.env` file in `backend/`:
-
-```env
-MONGO_URI=<your-mongodb-uri>
-JWT_SECRET=<your-jwt-secret>
-OPENROUTER_API_KEY=<your-openrouter-api-key>
-```
-
-### 3. Run backend locally
+### 2. Run backend locally
 
 ```bash
 cd backend
 npm run dev
 ```
 
-### 4. Run frontend locally
+### 3. Run frontend locally
 
 ```bash
 cd frontend
