@@ -46,7 +46,7 @@ const Session = () => {
 
   const handleStartInterview = async () => {
   try {
-    const res = await fetch("http://https://aira-ai-backend.onrender.com//api/interview/generate-questions", {
+    const res = await fetch("http://://aira-ai-backend.onrender.com//api/interview/generate-questions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

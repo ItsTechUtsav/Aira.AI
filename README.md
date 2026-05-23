@@ -50,7 +50,7 @@ Aira.AI is a full-stack interview practice platform with AI-powered question gen
 
 ## Runtime Behavior
 
-- Backend server runs on `http://https://aira-ai-backend.onrender.com/`
+- Backend server runs on `http://://aira-ai-backend.onrender.com/`
 - Frontend dev server runs on `http://localhost:5173`
 - Backend CORS is configured for `http://localhost:5173`
 - Protected API routes expect a `Bearer <token>` header
@@ -121,7 +121,7 @@ npm run dev
 
 ## Notes
 
-- The frontend login/register form posts to `http://https://aira-ai-backend.onrender.com//api/auth`
+- The frontend login/register form posts to `http://://aira-ai-backend.onrender.com//api/auth`
 - Protected pages require a logged-in user stored in localStorage
 - Interview sessions are saved in MongoDB and can be retrieved as history or report entries
 
