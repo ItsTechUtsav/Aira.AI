@@ -131,3 +131,5 @@ npm run dev
 - complete AI integration by toggling `USE_MOCK` and handling OpenRouter prompts reliably
 - improve error handling and user feedback on frontend
 - add tests for backend controllers and frontend pages
+
+## Contributors 
