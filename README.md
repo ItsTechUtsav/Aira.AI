@@ -149,13 +149,16 @@ npm run dev
 
 ## 🎨 Recruiter Visual Preview
 
-Add screenshots or deploy images below to showcase the product experience.
+1: Landing / Home Page -->
+<img width="1900" height="972" alt="image" src="https://github.com/user-attachments/assets/ad27c764-de0d-420f-89f6-fdb384c9abc8" />
 
-<!-- IMAGE PLACEHOLDER 1: Landing / Home Page -->
 
-<!-- IMAGE PLACEHOLDER 2: Interview Practice Session -->
+2: Interview Practice Session -->
+<img width="1357" height="904" alt="image" src="https://github.com/user-attachments/assets/e3905b3d-064d-4095-baab-4ef6d4dd8ad6" />
 
-<!-- IMAGE PLACEHOLDER 3: Report / Analytics -->
+
+3: Report / Analytics -->
+<img width="1210" height="794" alt="image" src="https://github.com/user-attachments/assets/d65e2805-ac56-47fc-8a59-4c823f382fd0" />
 
 ---
 
