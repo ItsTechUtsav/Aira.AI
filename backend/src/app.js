@@ -6,32 +6,24 @@ const cors = require('cors');
 
 const app = express();
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://aira-ai-xi.vercel.app"
-];
-
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    } else {
-      return callback(null, false);
-    }
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+  origin: ["http://localhost:5173", "https://aira-ai-xi.vercel.app"],
+  credentials: true
 }));
-
-app.options("*", cors());
 
 app.use(express.json());
 app.use(cookieParser());
 
+// routes
 app.use('/api/auth', authRoutes);
 app.use('/api/interview', interviewRoutes);
+
+// 404 handler (safe, no wildcard crash)
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: "Route Not Found"
+  });
+});
 
 module.exports = app;
