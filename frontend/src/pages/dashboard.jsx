@@ -51,8 +51,11 @@ const Dashboard = () => {
   ];
 
   const [interviews, setInterviews] = useState([]);
+  const [loadingInterviews, setLoadingInterviews] = useState(true);
 
     useEffect(() => {
+      setLoadingInterviews(true);
+        
       axios
         .get(`${import.meta.env.VITE_API_URL}/api/interview/my-interviews`, {
           headers: {
@@ -60,10 +63,12 @@ const Dashboard = () => {
           },
         })
         .then((res) => {
-          console.log("API DATA:", res.data); // 👈 ADD THIS
           setInterviews(res.data);
         })
-        .catch((err) => console.log(err));
+        .catch((err) => console.log(err))
+        .finally(() => {
+          setLoadingInterviews(false);
+        });
     }, []);
 
   return (
@@ -180,75 +185,101 @@ const Dashboard = () => {
                 </thead>
                 
                 <tbody className="divide-y divide-slate-800/50">
-                  {[...(interviews || [])]
-                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-                    .slice(0, 4)
-                    .map((row, i) => {
-                      const score = row.finalScore ? row.finalScore * 10 : 0;
+                  {loadingInterviews ? (
+                    [...Array(4)].map((_, i) => (
+                      <tr key={i}>
+                        <td className="px-6 py-5">
+                          <div className="h-5 w-40 rounded-lg bg-slate-800/80 animate-pulse" />
+                        </td>
                     
-                      let color = "#6366f1"; // default indigo
+                        <td className="px-6 py-5">
+                          <div className="h-4 w-20 rounded-lg bg-slate-800/80 animate-pulse" />
+                        </td>
                     
-                      if (score >= 85) color = "#10b981"; // green
-                      else if (score >= 70) color = "#6366f1"; // indigo
-                      else color = "#f59e0b"; // yellow
+                        <td className="px-6 py-5">
+                          <div className="flex flex-col items-center gap-2">
+                            <div className="h-4 w-12 rounded-lg bg-slate-800/80 animate-pulse" />
                     
-                      return (
-                        <tr key={i} className="hover:bg-slate-800/20 transition-colors">
-                          <td className="px-6 py-4">
-                            <p className="text-sm font-semibold text-white">
-                              {row.role || "Interview"}
-                            </p>
-                          </td>
+                            <div className="w-24 h-1.5 rounded-full bg-slate-800/80 animate-pulse" />
+                          </div>
+                        </td>
+                    
+                        <td className="px-6 py-5">
+                          <div className="flex justify-end">
+                            <div className="h-9 w-24 rounded-xl bg-slate-800/80 animate-pulse" />
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    [...(interviews || [])]
+                      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                      .slice(0, 4)
+                      .map((row, i) => {
+                        const score = row.finalScore ? row.finalScore * 10 : 0;
                       
-                          <td className="px-6 py-4 text-xs text-slate-400 font-medium">
-                            {new Date(row.createdAt).toLocaleDateString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                            })}
-                          </td>
-                          
-                          <td className="px-6 py-4">
-                            <div className="flex flex-col items-center gap-1.5">
-                              <span className="text-xs font-bold" style={{ color }}>
-                                {score}%
-                              </span>
-                          
-                              <div className="w-24 h-1 bg-slate-800 rounded-full overflow-hidden">
-                                <div
-                                  className="h-full"
-                                  style={{
-                                    width: `${score}%`,
-                                    backgroundColor: color,
-                                  }}
-                                />
-                              </div>
-                            </div>
-                          </td>
-                                
-                          <td className="px-6 py-4">
-                            <div className="flex justify-end">
-                              {row.status === "completed" ? (
-                                <button
-                                  onClick={() => navigate(`/report/${row._id}`)}
-                                  className="px-4 py-2 text-xs font-semibold bg-emerald-500/10 text-emerald-400 border-emerald-500/20 rounded-xl hover:bg-slate-700 hover:border-slate-600 transition-all duration-200"
-                                >
-                                  Review
-                                </button>
-                              ) : (
-                                <div className="px-4 py-2 text-xs font-medium bg-orange-500/10 text-orange-400 border-orange-500/20 rounded-xl">
-                                  Pending
+                        let color = "#6366f1";
+                      
+                        if (score >= 85) color = "#10b981";
+                        else if (score >= 70) color = "#6366f1";
+                        else color = "#f59e0b";
+                      
+                        return (
+                          <tr key={i} className="hover:bg-slate-800/20 transition-colors">
+                            <td className="px-6 py-4">
+                              <p className="text-sm font-semibold text-white">
+                                {row.role || "Interview"}
+                              </p>
+                            </td>
+                        
+                            <td className="px-6 py-4 text-xs text-slate-400 font-medium">
+                              {new Date(row.createdAt).toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                              })}
+                            </td>
+                            
+                            <td className="px-6 py-4">
+                              <div className="flex flex-col items-center gap-1.5">
+                                <span className="text-xs font-bold" style={{ color }}>
+                                  {score}%
+                                </span>
+                            
+                                <div className="w-24 h-1 bg-slate-800 rounded-full overflow-hidden">
+                                  <div
+                                    className="h-full"
+                                    style={{
+                                      width: `${score}%`,
+                                      backgroundColor: color,
+                                    }}
+                                  />
                                 </div>
-                              )}
-                            </div>
-                          </td>
-
-                          
-                        </tr>
-                      );
-                    })}
+                              </div>
+                            </td>
+                                  
+                            <td className="px-6 py-4">
+                              <div className="flex justify-end">
+                                {row.status === "completed" ? (
+                                  <button
+                                    onClick={() => navigate(`/report/${row._id}`)}
+                                    className="px-4 py-2 text-xs font-semibold bg-emerald-500/10 text-emerald-400 border-emerald-500/20 rounded-xl hover:bg-slate-700 hover:border-slate-600 transition-all duration-200"
+                                  >
+                                    Review
+                                  </button>
+                                ) : (
+                                  <div className="px-4 py-2 text-xs font-medium bg-orange-500/10 text-orange-400 border-orange-500/20 rounded-xl">
+                                    Pending
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                  )}
                 </tbody>
-
-              </table>
+                
+               </table>
             </div>
           </motion.div>
 

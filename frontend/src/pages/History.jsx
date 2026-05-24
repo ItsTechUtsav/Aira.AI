@@ -7,25 +7,34 @@ const InterviewHistory = () => {
    const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [interviews, setInterviews] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchInterviews();
   }, []);
 
   const fetchInterviews = async () => {
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/interview/my-interviews`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`
-        }
-      });
-
-      const data = await res.json();
-      setInterviews(data);
-    } catch (err) {
-      console.log(err);
-    }
-  };
+      try {
+        setLoading(true);
+      
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/interview/my-interviews`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+      
+        const data = await res.json();
+      
+        setInterviews(data);
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
   // 🎨 color logic
   const getColor = (score) => {
@@ -94,100 +103,173 @@ const InterviewHistory = () => {
           </thead>
 
           <tbody className="divide-y divide-slate-800/50">
-            {interviews
-              .filter((item) => {
-                if (!searchTerm.trim()) return true;
-              
-                return item.role
-                  ?.toLowerCase()
-                  .includes(searchTerm.toLowerCase());
-              })
-              .map((interview) => {
-                const percent = getPercentage(interview);
-                const color = getColor(percent);
-
-                return (
-                  <tr key={interview._id} className="group hover:bg-white/5 transition-colors">
-                    
+              {loading ? (
+                [...Array(6)].map((_, i) => (
+                  <tr key={i}>
                     {/* Role */}
                     <td className="py-5">
                       <div className="flex items-center gap-4">
-                        <div className="p-2.5 bg-indigo-500/10 rounded-lg border border-indigo-500/20">
-                          <Briefcase className="w-5 h-5 text-indigo-400" />
-                        </div>
-                        <div>
-                          <div className="text-white font-medium">{interview.role}</div>
-                          <div className="text-sm text-slate-500">{interview.type}</div>
+                        <div className="w-11 h-11 rounded-lg bg-slate-800 animate-pulse" />
+                
+                        <div className="space-y-2">
+                          <div className="h-4 w-36 rounded bg-slate-800 animate-pulse" />
+                          <div className="h-3 w-24 rounded bg-slate-800 animate-pulse" />
                         </div>
                       </div>
                     </td>
-
+                
                     {/* Date */}
                     <td className="py-5">
                       <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-slate-500" />
-                        <span className="text-sm">
-                          {new Date(interview.createdAt).toDateString()}
-                        </span>
+                        <div className="w-4 h-4 rounded-full bg-slate-800 animate-pulse" />
+                        <div className="h-4 w-32 rounded bg-slate-800 animate-pulse" />
                       </div>
                     </td>
-
+                
                     {/* Score */}
                     <td className="py-5">
                       <div className="flex items-center gap-3 min-w-[120px]">
-                        <span className="font-bold text-white text-sm">{percent}%</span>
-                        <div className="flex-1 h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full ${color} rounded-full`}
-                            style={{ width: `${percent}%` }}
-                          ></div>
-                        </div>
+                        <div className="h-4 w-10 rounded bg-slate-800 animate-pulse" />
+                
+                        <div className="flex-1 h-1.5 bg-slate-800 rounded-full animate-pulse" />
                       </div>
                     </td>
-
+                
                     {/* Duration */}
                     <td className="py-5">
-                      <div className="flex items-center gap-2 text-sm">
-                        <Clock className="w-4 h-4 text-slate-500" />
-                        {getDuration(interview)}
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 rounded-full bg-slate-800 animate-pulse" />
+                        <div className="h-4 w-10 rounded bg-slate-800 animate-pulse" />
                       </div>
                     </td>
-
+                
                     {/* Status */}
                     <td className="py-5">
-                      <div
-                        className={`flex items-center justify-center gap-2 text-xs font-medium px-3 py-1.5 rounded-lg w-fit border ${
-                          interview.status === "completed"
-                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                            : "bg-orange-500/10 text-orange-400 border-orange-500/20"
-                        }`}
-                      >
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        {interview.status}
-                      </div>
+                      <div className="h-8 w-28 rounded-lg bg-slate-800 animate-pulse" />
                     </td>
-                      
+                
+                    {/* Action */}
                     <td className="py-5">
                       <div className="flex justify-center">
-                        {interview.status === "completed" ? (
-                          <button
-                            onClick={() => navigate(`/report/${interview._id}`)}
-                            className="px-4 py-2 text-xs font-semibold text-slate-200 bg-[#1a2235] border border-slate-700 rounded-xl hover:bg-slate-700 hover:border-slate-600 transition-all duration-200"
-                          >
-                            Review
-                          </button>
-                        ) : (
-                          <div className="px-4 py-2 text-xs font-medium text-slate-500 bg-[#111827] border border-slate-800 rounded-xl">
-                            Pending
-                          </div>
-                        )}
+                        <div className="h-9 w-24 rounded-xl bg-slate-800 animate-pulse" />
                       </div>
                     </td>
-
                   </tr>
-                );
-              })}
-          </tbody>
+                ))
+              ) : (
+                interviews
+                  .filter((item) => {
+                    if (!searchTerm.trim()) return true;
+                  
+                    return item.role
+                      ?.toLowerCase()
+                      .includes(searchTerm.toLowerCase());
+                  })
+                  .map((interview) => {
+                    const percent = getPercentage(interview);
+                    const color = getColor(percent);
+                  
+                    return (
+                      <tr
+                        key={interview._id}
+                        className="group hover:bg-white/5 transition-colors"
+                      >
+                        {/* Role */}
+                        <td className="py-5">
+                          <div className="flex items-center gap-4">
+                            <div className="p-2.5 bg-indigo-500/10 rounded-lg border border-indigo-500/20">
+                              <Briefcase className="w-5 h-5 text-indigo-400" />
+                            </div>
+                    
+                            <div>
+                              <div className="text-white font-medium">
+                                {interview.role}
+                              </div>
+                    
+                              <div className="text-sm text-slate-500">
+                                {interview.type}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                    
+                        {/* Date */}
+                        <td className="py-5">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="w-4 h-4 text-slate-500" />
+                    
+                            <span className="text-sm">
+                              {new Date(interview.createdAt).toDateString()}
+                            </span>
+                          </div>
+                        </td>
+                    
+                        {/* Score */}
+                        <td className="py-5">
+                          <div className="flex items-center gap-3 min-w-[120px]">
+                            <span className="font-bold text-white text-sm">
+                              {percent}%
+                            </span>
+                    
+                            <div className="flex-1 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                              <div
+                                className={`h-full ${color} rounded-full`}
+                                style={{ width: `${percent}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        </td>
+                    
+                        {/* Duration */}
+                        <td className="py-5">
+                          <div className="flex items-center gap-2 text-sm">
+                            <Clock className="w-4 h-4 text-slate-500" />
+                    
+                            {getDuration(interview)}
+                          </div>
+                        </td>
+                    
+                        {/* Status */}
+                        <td className="py-5">
+                          <div
+                            className={`flex items-center justify-center gap-2 text-xs font-medium px-3 py-1.5 rounded-lg w-fit border ${
+                              interview.status === "completed"
+                                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                                : "bg-orange-500/10 text-orange-400 border-orange-500/20"
+                            }`}
+                          >
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                          
+                            {interview.status}
+                          </div>
+                        </td>
+                          
+                        {/* Action */}
+                        <td className="py-5">
+                          <div className="flex justify-center">
+                            {interview.status === "completed" ? (
+                              <button
+                                onClick={() =>
+                                  navigate(`/report/${interview._id}`)
+                                }
+                                className="px-4 py-2 text-xs font-semibold text-slate-200 bg-[#1a2235] border border-slate-700 rounded-xl hover:bg-slate-700 hover:border-slate-600 transition-all duration-200"
+                              >
+                                Review
+                              </button>
+                            ) : (
+                              <div className="px-4 py-2 text-xs font-medium text-slate-500 bg-[#111827] border border-slate-800 rounded-xl">
+                                Pending
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+              )}
+            </tbody>
+
+
           {interviews.filter((item) =>
             item.role?.toLowerCase().includes(searchTerm.toLowerCase())
           ).length === 0 && searchTerm.trim() && (
