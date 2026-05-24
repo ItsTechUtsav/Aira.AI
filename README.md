@@ -1,62 +1,106 @@
 # Aira.AI
 
-Aira.AI is a full-stack interview practice platform with AI-powered question generation, answer evaluation, and performance reporting. It combines a React + Vite frontend with an Express + MongoDB backend and integrates with OpenRouter for AI-driven interview content.
+**Aira.AI** is a full-stack interview preparation platform built with React, Vite, Express, MongoDB, and OpenRouter AI. It helps candidates generate practice interviews, submit answers, and review performance with feedback reports.
 
-## Project Structure
+---
+
+## 🚀 Project Overview
+
+Aira.AI allows users to:
+
+- Generate interview questions by role, difficulty, and question type
+- Submit answers and receive scoring and feedback
+- Review interview history and detailed reports
+- Access protected pages via JWT-secured authentication
+
+---
+
+## 🌐 Deployment
+
+- Frontend ready for **Vercel** deployment
+- Backend built with **Express + MongoDB** and exposes REST endpoints
+- AI features integrate with **OpenRouter** but use a mock fallback by default
+
+> Add your deployed live URL here once available.
+
+---
+
+## 🎯 Core Features
+
+- **Authentication**
+  - Register and login with username/email
+  - JWT-based protected routes
+  - Change username, verify password, change password, delete account
+
+- **Interview Practice**
+  - Generate five interview questions matched to role, difficulty, and type
+  - Submit answers with automatic time-limit and scoring checks
+  - Finish interviews to calculate final score, summary, strengths, and weaknesses
+
+- **History & Reporting**
+  - View previous interview sessions
+  - See detailed report pages for each completed interview
+  - Track performance status such as Excellent, Good, Average, or Needs Improvement
+
+---
+
+## 🧩 Tech Stack
+
+- Frontend: `React`, `Vite`, `React Router`, `Tailwind CSS`, `Framer Motion`
+- Backend: `Node.js`, `Express`, `MongoDB`, `Mongoose`, `jsonwebtoken`, `bcryptjs`
+- AI / API: `Axios`, `OpenRouter` service
+- Dev tools: `ESLint`, `nodemon`
+
+---
+
+## 📁 Project Structure
 
 - `backend/`
-  - `server.js` - backend server entrypoint
-  - `src/app.js` - Express app setup with middleware and routes
-  - `src/controllers/` - business logic for authentication and interview flows
-  - `src/models/` - MongoDB schemas for users and interview sessions
-  - `src/routes/` - API routes for auth and interview features
-  - `src/db/db.js` - MongoDB connection helper
-  - `src/services/openRouter.service.js` - OpenRouter AI service integration
-  - `src/middlewares/auth.middleware.js` - JWT auth middleware
+  - `server.js` — backend server entrypoint
+  - `src/app.js` — Express app, middleware, and CORS config
+  - `src/controllers/` — auth and interview controllers
+  - `src/db/db.js` — MongoDB connection helper
+  - `src/db/models/` — `user.model.js` and `interview.model.js`
+  - `src/services/openRouter.service.js` — OpenRouter AI helper
+  - `src/middlewares/auth.middleware.js` — JWT auth middleware
+  - `src/routes/` — `auth.routes.js` and `interview.routes.js`
 
 - `frontend/`
-  - `src/App.jsx` - main React app component
-  - `src/main.jsx` - React entrypoint and router setup
-  - `src/routes/AppRoutes.jsx` - public and protected application routes
-  - `src/routes/ProtectedRoute.jsx` - route guard for authenticated access
-  - `src/pages/` - UI pages including Home, Login, Interview, History, Report, Dashboard, Analytics, Settings
+  - `src/main.jsx` — React entrypoint
+  - `src/App.jsx` — app shell
+  - `src/routes/AppRoutes.jsx` — public and protected routes
+  - `src/routes/ProtectedRoute.jsx` — auth guard for protected pages
+  - `src/pages/` — Home, Login, Interview, History, Analytics, Report, Settings, Dashboard, Session
+  - `public/` — static files and metadata
+  - `dockerfile` — optional frontend containerization
 
-## Key Features
+---
 
-- User authentication
-  - register
-  - login
-  - get user profile
-  - username updates
-  - password verification and change
-  - account deletion
+## 🔌 Backend API Endpoints
 
-- AI-driven interview flows
-  - generate interview questions for a selected role, difficulty, and type
-  - submit answers for timed questions
-  - receive AI-generated feedback and scored evaluation
-  - complete interviews and generate a summary report
-  - view past interview history and individual reports
+### Authentication
 
-- Frontend pages
-  - landing/home page
-  - authentication page
-  - protected dashboard experience
-  - interview practice session
-  - interview history
-  - analytics
-  - settings
-  - report view
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `GET /api/auth/me`
+- `PUT /api/auth/change-username`
+- `POST /api/auth/verify-password`
+- `PUT /api/auth/change-password`
+- `DELETE /api/auth/delete-account`
 
-## Runtime Behavior
+### Interview
 
-- Backend server runs on `http://://aira-ai-backend.onrender.com/`
-- Frontend dev server runs on `http://localhost:5173`
-- Backend CORS is configured for `http://localhost:5173`
-- Protected API routes expect a `Bearer <token>` header
-- Auth flow stores `user` and `token` in `localStorage`
+- `POST /api/interview/generate-questions`
+- `POST /api/interview/submit-answer`
+- `POST /api/interview/finish`
+- `GET /api/interview/my-interviews`
+- `GET /api/interview/report/:id`
 
-## Setup Instructions
+> Protected routes require an `Authorization: Bearer <token>` header.
+
+---
+
+## ⚙️ Setup Instructions
 
 ### 1. Install dependencies
 
@@ -68,71 +112,58 @@ cd ../frontend
 npm install
 ```
 
-### 2. Configure environment variables
 
-Create a `.env` file in `backend/` with the following values:
-
-```env
-MONGO_URI=<your-mongodb-uri>
-JWT_SECRET=<your-jwt-secret>
-OPENROUTER_API_KEY=<your-openrouter-api-key>
-```
-
-> Note: the backend currently uses a mock AI mode for interview question generation and evaluation. To enable real AI calls, update the `USE_MOCK` constant in `backend/src/controllers/interview.controller.js`.
-
-### 3. Start the backend
+### 2. Run backend locally
 
 ```bash
 cd backend
 npm run dev
 ```
 
-### 4. Start the frontend
+### 3. Run frontend locally
 
 ```bash
 cd frontend
 npm run dev
 ```
 
-## Development Notes
+---
 
-- Authentication endpoints are under `POST /api/auth/*`
-- Interview endpoints are under `POST /api/interview/*` and `GET /api/interview/*`
-- `backend/src/services/openRouter.service.js` sends messages to `https://openrouter.ai/api/v1/chat/completions`
-- The interview controller currently uses `USE_MOCK = true` and mock responses for evaluation and question generation
+## 📝 Notes
 
-## Useful Scripts
+- Backend CORS allows `http://localhost:5173` and `https://aira-ai-xi.vercel.app`.
+- AI routes currently use `USE_MOCK = true` in `backend/src/controllers/interview.controller.js`.
+- The AI helper sends requests to `https://openrouter.ai/api/v1/chat/completions` using `openai/gpt-4o-mini`.
+- Frontend protection is handled by `frontend/src/routes/ProtectedRoute.jsx` with `localStorage.user`.
 
-### Backend
+---
 
-- `npm run dev` - start backend with nodemon
+## 🎨 Recruiter Visual Preview
 
-### Frontend
+1: Landing / Home Page -->
+<img width="1900" height="972" alt="image" src="https://github.com/user-attachments/assets/ad27c764-de0d-420f-89f6-fdb384c9abc8" />
 
-- `npm run dev` - start Vite dev server
-- `npm run build` - build production frontend assets
-- `npm run preview` - preview the built frontend
-- `npm run lint` - run ESLint checks
 
-### Docker
+2: Interview Practice Session -->
+<img width="1357" height="904" alt="image" src="https://github.com/user-attachments/assets/e3905b3d-064d-4095-baab-4ef6d4dd8ad6" />
 
-- `frontend/dockerfile` is included for containerizing the frontend app
-- Build a frontend image from the `frontend` directory with Docker
 
-## Notes
+3: Report / Analytics -->
+<img width="1210" height="794" alt="image" src="https://github.com/user-attachments/assets/d65e2805-ac56-47fc-8a59-4c823f382fd0" />
 
-- The frontend login/register form posts to `http://://aira-ai-backend.onrender.com//api/auth`
-- Protected pages require a logged-in user stored in localStorage
-- Interview sessions are saved in MongoDB and can be retrieved as history or report entries
+---
 
-## Future Enhancements
+## 👥 Team
 
-- add production environment setup and deployment guide
-- complete AI integration by toggling `USE_MOCK` and handling OpenRouter prompts reliably
-- improve error handling and user feedback on frontend
-- add tests for backend controllers and frontend pages
+- Krishna Krishnatrey — Full Stack Developer
+- Shamit Gautam — AI and Backend Engineer
+- Utsav Sharma — DevOps Engineer
 
-## Contributors
-Krishna Krishnatrey(FUll Stack Developer)
-Shamit Gautam(Motivation Engg.)
-Utsav Sharma(DevOps Engg.)
+---
+
+## 📌 Future Enhancements
+
+- Enable live AI question generation by setting `USE_MOCK = false`
+- Add end-to-end and unit tests
+- Add backend production deployment and CI/CD docs
+- Improve UX with richer session analytics and feedback flow
