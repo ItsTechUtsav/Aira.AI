@@ -20,6 +20,10 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    hasUsedFreeInterview: {
+    type: Boolean,
+    default: false
+    },
     verificationCode: String,
 });
 
