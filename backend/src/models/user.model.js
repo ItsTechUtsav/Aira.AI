@@ -15,7 +15,12 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,   
         required: true
-    }
+    },
+    isVarified: {
+        type: Boolean,
+        default: false
+    },
+    verificationCode: String,
 });
 
 const userModel = mongoose.model('user', userSchema);
