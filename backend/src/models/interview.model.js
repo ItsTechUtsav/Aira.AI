@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+
 const questionSchema = new mongoose.Schema({
     question: String,   
     answer: String,
@@ -14,7 +15,7 @@ const questionSchema = new mongoose.Schema({
 const interviewSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        ref: 'User', 
         required: true
     },
     role: {

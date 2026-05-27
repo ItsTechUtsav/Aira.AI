@@ -1,9 +1,10 @@
-import nodemailer from "nodemailer";
+// 🚀 FIXED: Changed from import to require to prevent CommonJS runtime crashes
+const nodemailer = require("nodemailer");
 
-export const transporter = nodemailer.createTransport({
+const transporter = nodemailer.createTransport({
   service: "gmail",
   host: "smtp.gmail.com",
-  port: 465, // Use secure SSL port to ensure Render doesn't block it later
+  port: 465, 
   secure: true,
   auth: {
     user: process.env.SMTP_USER,
@@ -11,7 +12,7 @@ export const transporter = nodemailer.createTransport({
   },
 });
 
-export const sendVerificationEmail = async (email, verificationToken) => {
+const sendVerificationEmail = async (email, verificationToken) => {
   try {
     const mailOptions = {
       from: process.env.SMTP_USER,
@@ -36,4 +37,10 @@ export const sendVerificationEmail = async (email, verificationToken) => {
     console.error("Nodemailer Email Dispatch Failure:", error);
     throw new Error("Failed to send verification email.");
   }
+};
+
+
+module.exports = {
+  transporter,
+  sendVerificationEmail
 };

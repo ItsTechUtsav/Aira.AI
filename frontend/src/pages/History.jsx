@@ -58,6 +58,13 @@ const InterviewHistory = () => {
     // finalScore is avg (0–10), convert to %
     return Math.round((interview.finalScore / 10) * 100);
   };
+  const filteredInterviews = interviews.filter((item) => {
+  if (!searchTerm.trim()) return true;
+
+  return item.role
+    ?.toLowerCase()
+    .includes(searchTerm.toLowerCase());
+});
 
   return (
     <div className="min-h-screen bg-[#0a0f1a] text-slate-300 p-8 font-sans">
@@ -81,7 +88,10 @@ const InterviewHistory = () => {
             />
           </div>
 
-          <button className="flex items-center gap-2 bg-[#161d2f] border border-slate-800 px-4 py-2 rounded-lg hover:bg-slate-800 transition-colors">
+          <button
+              disabled
+              className="flex items-center gap-2 bg-[#161d2f] border border-slate-800 px-4 py-2 rounded-lg opacity-50 cursor-not-allowed"
+            >
             <Filter className="w-4 h-4" />
             <span>Filter</span>
           </button>
@@ -157,7 +167,7 @@ const InterviewHistory = () => {
                   </tr>
                 ))
               ) : (
-                interviews
+                filteredInterviews
                   .filter((item) => {
                     if (!searchTerm.trim()) return true;
                   
@@ -270,13 +280,11 @@ const InterviewHistory = () => {
             </tbody>
 
 
-          {interviews.filter((item) =>
-            item.role?.toLowerCase().includes(searchTerm.toLowerCase())
-          ).length === 0 && searchTerm.trim() && (
-            <div className="text-center py-10 text-slate-500 text-sm">
-              Search for a valid interview domain
-            </div>
-          )}
+          {!loading && filteredInterviews.length === 0 && searchTerm.trim() && (
+              <div className="text-center py-10 text-slate-500 text-sm">
+                No interview sessions found for "{searchTerm}"
+              </div>
+            )}
         </table>
       </div>
     </div>

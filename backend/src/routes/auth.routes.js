@@ -4,8 +4,8 @@ const authMiddleware = require('../middlewares/auth.middleware.js');
 
 const router = express.Router();
 
-
 router.post('/register', authController.registerUser);
+router.post('/verify-otp', authMiddleware, authController.verifyOtp);
 router.post('/login', authController.loginUser); 
 router.get("/me", authMiddleware, authController.getMe);
 
@@ -32,6 +32,5 @@ router.delete(
   authMiddleware,
   authController.deleteAccount
 );
-
 
 module.exports = router;
