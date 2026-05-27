@@ -25,6 +25,10 @@ const userSchema = new mongoose.Schema({
     },
     verificationToken: {
         type: String
+    },
+    freeInterviewUsed: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true });
 

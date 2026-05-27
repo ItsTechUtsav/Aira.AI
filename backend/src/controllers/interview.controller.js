@@ -98,21 +98,24 @@ export const generateQuestions = async (req, res) => {
     }
 
     const interview = await interviewModel.create({
-      userId: user._id,
-      role,
-      difficulty,
-      type,
-      questions: questionsArray.map((q) => ({
-        question: q,
-        timelimit: 120,
-      }))
-    });
-
-    return res.json({
-      interviewId: interview._id,
-      questions: interview.questions,
-      username: user.username
-    });
+        userId: user._id,
+        role,
+        difficulty,
+        type,
+        questions: questionsArray.map((q) => ({
+          question: q,
+          timelimit: 120,
+        }))
+      });
+      
+      user.freeInterviewUsed = true;
+      await user.save();
+      
+      return res.json({
+        interviewId: interview._id,
+        questions: interview.questions,
+        username: user.username
+      });
 
   } catch (error) {
     console.error("Question Generation Error:", error);

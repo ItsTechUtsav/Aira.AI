@@ -29,17 +29,35 @@ const Session = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [userProfile, setUserProfile] = useState(null);
+  const [hasUsedFreeInterview, setHasUsedFreeInterview] = useState(false);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-
-    if (storedUser) {
+    const fetchUserProfile = async () => {
       try {
-        setUserProfile(JSON.parse(storedUser));
-      } catch (e) {
-        console.error("Error parsing user profile data:", e);
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/auth/me`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+
+        if (!res.ok) return;
+
+        const data = await res.json();
+
+        setUserProfile(data);
+        setHasUsedFreeInterview(data.freeInterviewUsed);
+
+        localStorage.setItem("user", JSON.stringify(data));
+
+      } catch (err) {
+        console.error("Failed to fetch user profile:", err);
       }
-    }
+    };
+
+    fetchUserProfile();
   }, []);
 
   const roles = [
@@ -69,20 +87,38 @@ const Session = () => {
     selection.difficulty &&
     selection.type;
 
-  const hasUsedFreeInterview =
-    userProfile && userProfile.freeInterviewUsed;
-
   const handleStartInterview = async () => {
     if (!isFormComplete || isSubmitting) return;
-
-    if (hasUsedFreeInterview) {
-      return;
-    }
 
     setIsSubmitting(true);
     setErrorMsg('');
 
     try {
+
+      // CHECK USER STATUS FROM BACKEND
+      const checkRes = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/auth/me`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      const currentUser = await checkRes.json();
+
+      if (currentUser.freeInterviewUsed) {
+        setHasUsedFreeInterview(true);
+
+        setErrorMsg(
+          "You have already completed your free AI mock interview session."
+        );
+
+        setIsSubmitting(false);
+        return;
+      }
+
+      // GENERATE QUESTIONS
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/api/interview/generate-questions`,
         {
@@ -99,26 +135,27 @@ const Session = () => {
 
       if (!res.ok) {
         setErrorMsg(
-          data.message || "Failed to initialize interview session."
+          data.message ||
+          "Unable to initialize interview pipeline."
         );
 
         setIsSubmitting(false);
         return;
       }
 
-      if (userProfile) {
-        const updatedUser = {
-          ...userProfile,
-          freeInterviewUsed: true
-        };
+      // UPDATE LOCAL USER STATE
+      const updatedUser = {
+        ...currentUser,
+        freeInterviewUsed: true
+      };
 
-        localStorage.setItem(
-          "user",
-          JSON.stringify(updatedUser)
-        );
+      localStorage.setItem(
+        "user",
+        JSON.stringify(updatedUser)
+      );
 
-        setUserProfile(updatedUser);
-      }
+      setUserProfile(updatedUser);
+      setHasUsedFreeInterview(true);
 
       navigate("/interview", {
         state: {
@@ -161,7 +198,6 @@ const Session = () => {
           animate={{ opacity: 1, y: 0 }}
           className="relative overflow-hidden rounded-3xl border border-indigo-500/20 bg-gradient-to-br from-indigo-600/10 via-[#12182b] to-[#0e1326] p-7 shadow-2xl shadow-indigo-950/20"
         >
-          {/* Glow */}
           <div className="absolute top-0 right-0 w-52 h-52 bg-indigo-500/10 blur-3xl rounded-full" />
 
           <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
@@ -173,6 +209,7 @@ const Session = () => {
 
               <div>
                 <div className="flex items-center gap-2 mb-2">
+
                   <span className="px-2.5 py-1 rounded-full text-[10px] uppercase tracking-wider font-bold bg-indigo-500/15 text-indigo-300 border border-indigo-500/20">
                     Beta Access
                   </span>
@@ -180,6 +217,7 @@ const Session = () => {
                   <span className="px-2.5 py-1 rounded-full text-[10px] uppercase tracking-wider font-bold bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
                     Free Tier Used
                   </span>
+
                 </div>
 
                 <h2 className="text-2xl font-bold tracking-tight text-white">
@@ -187,7 +225,7 @@ const Session = () => {
                 </h2>
 
                 <p className="text-sm text-slate-400 leading-relaxed mt-3 max-w-[700px]">
-                  Thanks for trying the Aira AI beta experience. 
+                  Thanks for trying the Aira AI beta experience.
                   You’ve successfully completed your free evaluation session.
                   <br /><br />
                   We’re currently building Version 2.0 which will introduce
@@ -196,6 +234,7 @@ const Session = () => {
                 </p>
 
                 <div className="flex flex-wrap gap-3 mt-5">
+
                   <div className="px-3 py-2 rounded-xl bg-white/[0.03] border border-white/[0.05] text-xs text-slate-300 flex items-center gap-2">
                     <Sparkles size={14} className="text-indigo-400" />
                     AI Voice Interviews
@@ -210,11 +249,13 @@ const Session = () => {
                     <Sparkles size={14} className="text-indigo-400" />
                     Unlimited Sessions
                   </div>
+
                 </div>
               </div>
             </div>
 
             <div className="flex flex-col gap-3 min-w-[220px]">
+
               <button
                 onClick={() => navigate("/history")}
                 className="w-full bg-indigo-600 hover:bg-indigo-500 transition-all text-white rounded-xl py-3 font-semibold flex items-center justify-center gap-2 shadow-lg shadow-indigo-900/30"
@@ -229,6 +270,7 @@ const Session = () => {
               >
                 Back to Dashboard
               </button>
+
             </div>
           </div>
         </motion.div>
