@@ -1,4 +1,3 @@
-// 🚀 FIXED: Changed from import to require to prevent CommonJS runtime crashes
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({

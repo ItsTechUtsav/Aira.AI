@@ -57,7 +57,6 @@ async function registerUser(req, res) {
     }
 }
 
-// 🚀 ADDED EXPLICIT VALIDATION ENDPOINT FOR FRONTEND CODE SUBMISSION
 async function verifyOtp(req, res) {
     try {
         const { otp } = req.body;
