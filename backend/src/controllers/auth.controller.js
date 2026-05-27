@@ -1,7 +1,6 @@
 const userModel = require('../models/user.model.js');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const { sendVerificationEmail } = require('../middlewares/email.config.js');
 
 
 
@@ -20,16 +19,11 @@ async function registerUser(req, res) {
 
     const hash = await bcrypt.hash(password, 10);
 
-    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-
     const user = await userModel.create({
         username,
         email,
-        password: hash,
-        verificationCode
+        password: hash
     });
-
-    await sendVerificationEmail(email, verificationCode);
 
     const token = jwt.sign({
          id: user._id 
@@ -46,49 +40,6 @@ async function registerUser(req, res) {
         }
     });
 
-}
-
-async function verifyEmail(req, res) {
-    try {
-        const { email, code } = req.body;
-
-        const user = await userModel.findOne({ email });
-
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        if (user.isVarified) {
-            return res.status(400).json({ message: "Account is already verified" });
-        }
-
-        // Check if the code matches
-        if (user.verificationCode !== code) {
-            return res.status(400).json({ message: "Invalid verification code" });
-        }
-
-        // Code matches! Clear the code and flip the verification status
-        user.isVarified = true;
-        user.verificationCode = undefined; // Clears it from DB
-        await user.save();
-
-        // 4. Now that they are verified, generate the JWT token and set the cookie
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-        res.cookie('token', token);
-
-        res.status(200).json({
-            message: "Email verified successfully!",
-            token,
-            user: {
-                id: user._id,
-                username: user.username,
-                email: user.email
-            }
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Internal server error" });
-    }
 }
 
 async function loginUser(req, res) {
@@ -294,7 +245,6 @@ module.exports = {
     changeUsername,
     changePassword,
     deleteAccount,
-    verifyPassword,
-    verifyEmail
+    verifyPassword
 }
 

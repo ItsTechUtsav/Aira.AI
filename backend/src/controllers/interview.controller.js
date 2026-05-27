@@ -1,10 +1,60 @@
-import { Askai } from "../services/openRouter.service.js";
+import {Askai} from "../services/openRouter.service.js";
 import interviewModel from "../models/interview.model.js";
-import userModel from "../models/user.model.js";
+import userModel from "../models/user.model.js"
+
+const USE_MOCK = false;
+const mockResponse = [
+  "Explain your experience with React and state management in real projects.",
+  "How do you handle asynchronous operations in JavaScript applications?",
+  "Describe a challenging bug you fixed in a production environment.",
+  "How would you optimize performance in a slow web application?",
+  "Explain system design of a basic scalable web application."
+];
+
+const mockEvaluation = [
+  {
+    confidence: 9,
+    communication: 9,
+    correctness: 9,
+    finalScore: 9,
+    feedback: "Answer lacks clarity and relevant technical explanation."
+  },
+  {
+    confidence: 9,
+    communication: 9,
+    correctness: 9,
+    finalScore: 9,
+    feedback: "Basic idea present but explanation is weak and incomplete."
+  },
+  {
+    confidence: 9,
+    communication: 9,
+    correctness: 9,
+    finalScore: 9,
+    feedback: "Vague response, lacks real example and proper structure."
+  },
+  {
+    confidence: 9,
+    communication: 9,
+    correctness: 9,
+    finalScore: 9,
+    feedback: "Does not address performance optimization clearly."
+  },
+  {
+    confidence: 9,
+    communication: 9,
+    correctness: 9,
+    finalScore: 9,
+    feedback: "System design explanation is unclear and incomplete."
+  }
+];
 
 export const generateQuestions = async (req, res) => {
   try {
+
+
     const { role, difficulty, type } = req.body;
+
 
     if (!role || !difficulty || !type) {
       return res
@@ -12,6 +62,7 @@ export const generateQuestions = async (req, res) => {
         .json({ message: "Role, difficulty, and type are required" });
     }
 
+    // const user = await userModel.findById(req.userId);
     if (!req.userId) {
       return res.status(401).json({ message: "Unauthorized: No userId" });
     }
@@ -22,11 +73,8 @@ export const generateQuestions = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // 🚀 BETA RESTRICTION: Check if user already used their 1 free interview slot
-    if (user.hasUsedFreeInterview) {
-      return res.status(403).json({
-        message: "Beta Limit Reached: You have used your 1 free AI interview slot. Tiered pricing plans are coming in the next version!",
-      });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
 
     const userPrompt = `
@@ -36,9 +84,9 @@ export const generateQuestions = async (req, res) => {
         `;
 
     const messages = [
-      {
-        role: "system",
-        content: `
+  {
+    role: "system",
+    content: `
         You are a professional interviewer.
 
         Generate exactly 5 interview questions.
@@ -62,102 +110,119 @@ export const generateQuestions = async (req, res) => {
         Question Generation Rules:
         Make questions based or relevnt on the candidate's or user role, interviewMode or type, and difficulty(dont mix the levels) all given by user and strictly follow the rules.
         `
-      },
-      {
-        role: "user",
-        content: userPrompt
+          },
+          {
+            role: "user",
+            content: userPrompt
+          }
+        ];
+
+        // JUST FOR TESTING 
+
+        // const aiResponse = await Askai(messages);
+
+        // if (!aiResponse) {
+        //   return res.status(500).json({ message: "ai return empty" });
+        // }
+
+        // const questionsArray = aiResponse
+        // .split("\n")
+        // .map(q => q.trim())
+        // .filter(q => q.length > 0)
+        // .slice(0, 5);
+
+        // this is replacment 
+
+        const aiResponse = USE_MOCK
+          ? mockResponse
+          : await Askai(messages);
+
+        // const questionsArray = aiResponse;
+
+        let questionsArray;
+
+        if (USE_MOCK) {
+          questionsArray = aiResponse;
+        } else {
+          questionsArray = aiResponse
+            .split("\n")
+            .map(q => q.trim())
+            .filter(q => q.length > 0)
+            .slice(0, 5);
+        }
+
+        if (!Array.isArray(questionsArray) || questionsArray.length === 0) {
+          return res.status(500).json({ message: "AI failed to generate question" });
+        }
+
+        const interview = await interviewModel.create({
+            userId: user._id,
+            role,
+            difficulty,
+            type,
+            questions: questionsArray.map((q,index)=> ({
+                question: q,
+                timelimit: 120, 
+            }))
+        });
+
+        res.json({
+            interviewId: interview._id,
+            questions: interview.questions,
+            username: user.username 
+        });
+
+      } catch (error) {
+        return res.status(500).json({ message: "Error generating questions"});
       }
-    ];
+    };
 
-    const aiResponse = USE_MOCK
-      ? mockResponse
-      : await Askai(messages);
 
-    let questionsArray;
-
-    if (USE_MOCK) {
-      questionsArray = aiResponse;
-    } else {
-      questionsArray = aiResponse
-        .split("\n")
-        .map(q => q.trim())
-        .filter(q => q.length > 0)
-        .slice(0, 5);
-    }
-
-    if (!Array.isArray(questionsArray) || questionsArray.length === 0) {
-      return res.status(500).json({ message: "AI failed to generate question" });
-    }
-
-    const interview = await interviewModel.create({
-      userId: user._id,
-      role,
-      difficulty,
-      type,
-      questions: questionsArray.map((q, index) => ({
-        question: q,
-        timelimit: 120,
-      }))
-    });
-
-    // 🚀 UPDATE USER STATE: Flip the beta flag so they can't initiate another one
-    user.hasUsedFreeInterview = true;
-    await user.save();
-
-    res.json({
-      interviewId: interview._id,
-      questions: interview.questions,
-      username: user.username
-    });
-
-  } catch (error) {
-    return res.status(500).json({ message: "Error generating questions" });
-  }
-};
 
 export const submitAnswer = async (req, res) => {
-  try {
-    const { interviewId, questionindex, answer, timetaken } = req.body;
+    try {
+        const { interviewId, questionindex, answer, timetaken} = req.body;
 
-    const interview = await interviewModel.findById(interviewId);
+        const interview = await interviewModel.findById(interviewId);
+ 
 
-    if (!interview) {
-      return res.status(404).json({ message: "Interview not found" });
-    }
+        if(!interview){
+            return res.status(404).json({ message: "Interview not found"});
+        };
 
-    const question = interview.questions[questionindex];
+        const question = interview.questions[questionindex];
 
-    if (!question) {
-      return res.status(404).json({ message: "Question not found" });
-    }
+        if(!question){
+            return res.status(404).json({ message: "Question not found"});
+        }
 
-    if (!answer) {
-      question.score = 0;
-      question.feedback = "No answer provided";
-      question.answer = "";
+        if(!answer){
+          question.score = 0;
+          question.feedback = "No answer provided";
+          question.answer = "";
 
-      await interview.save();
-      return res.json({
-        feedback: question.feedback,
-      });
-    }
+          await interview.save();
+           return res.json({
+            feedback: question.feedback,
+           })
+        }
 
-    if (timetaken > question.timelimit) {
-      question.score = 0;
-      question.feedback = "Time limit exceeded";
-      question.answer = answer;
+        if(timetaken > question.timelimit){
+          question.score = 0;
+          question.feedback = "Time limit exceeded";
+          question.answer = answer;
 
-      await interview.save();
+          await interview.save();
 
-      return res.json({
-        feedback: question.feedback,
-      });
-    }
+          return res.json({
+            feedback: question.feedback,
+           })
+        }
 
-    const messages = [
+        const messages = [
       {
         role: "system",
-        content: `
+            content: `
         You are a professional human interviewer evaluating a candidate's answer in a real interview.
 
         Evaluate naturally and fairly, like a real person would.
@@ -197,53 +262,56 @@ export const submitAnswer = async (req, res) => {
           "feedback": "short human feedback"
         }
         `
-      },
-      {
-        role: "user",
-        content: `
+          }
+          ,
+          {
+            role: "user",
+            content: `
             Question: ${question.question}
             Answer: ${answer}
             `
-      }
-    ];
+          }
+        ];
 
-    let parsed;
+        let parsed;
 
-    if (USE_MOCK) {
-      parsed = mockEvaluation[questionindex] || {
-        confidence: 1,
-        communication: 1,
-        correctness: 1,
-        finalScore: 1,
-        feedback: "Average answer, needs improvement."
-      };
-    } else {
-      const aiResponse = await Askai(messages);
+        if (USE_MOCK) {
+          parsed = mockEvaluation[questionindex] || {
+          confidence: 1,
+          communication: 1,
+          correctness: 1,
+          finalScore: 1,
+          feedback: "Average answer, needs improvement."
+        };
+        } else {
+          const aiResponse = await Askai(messages);
+        
+          try {
+            parsed = JSON.parse(aiResponse);
+          } catch (error) {
+            return res.status(500).json({ message: "Invalid AI response format" });
+          }
+        }
 
-      try {
-        parsed = JSON.parse(aiResponse);
-      } catch (error) {
-        return res.status(500).json({ message: "Invalid AI response format" });
-      }
+        question.answer = answer;
+        question.confidence = parsed.confidence;
+        question.communication = parsed.communication;
+        question.correctness = parsed.correctness;
+        question.score = parsed.finalScore;
+        question.feedback = parsed.feedback; 
+
+        await interview.save();
+
+        return res.status(200).json({
+            feedback: question.feedback,
+        });
+
+
+    } catch (error) {
+        return res.status(500).json({ message: "Error submitting answer"});
     }
-
-    question.answer = answer;
-    question.confidence = parsed.confidence;
-    question.communication = parsed.communication;
-    question.correctness = parsed.correctness;
-    question.score = parsed.finalScore;
-    question.feedback = parsed.feedback;
-
-    await interview.save();
-
-    return res.status(200).json({
-      feedback: question.feedback,
-    });
-
-  } catch (error) {
-    return res.status(500).json({ message: "Error submitting answer" });
-  }
 };
+
 
 export const finishInterview = async (req, res) => {
   try {
@@ -261,7 +329,7 @@ export const finishInterview = async (req, res) => {
 
     const answeredQuestions = interview.questions.filter(q => q.answer);
     const totalquestions = answeredQuestions.length;
-
+    
     let totalscore = 0;
     let totalconfidence = 0;
     let totalcommunication = 0;
@@ -301,14 +369,14 @@ Return JSON:
       },
       {
         role: "user",
-        content: interview.questions.map((q, i) =>
-          `Q${i + 1}: ${q.question}
-               Answer: ${q.answer}
-               Score: ${q.score}
-               Feedback: ${q.feedback}`
-        ).join("\n\n")
-      }
-    ];
+        content: interview.questions.map((q, i) => 
+            `Q${i+1}: ${q.question}
+             Answer: ${q.answer}
+             Score: ${q.score}
+             Feedback: ${q.feedback}`
+          ).join("\n\n")
+       }
+      ];
 
     let reportData;
 
@@ -419,6 +487,8 @@ export const getInterviewReport = async (req, res) => {
       })),
       createdAt: interview.createdAt
     });
+
+    
 
   } catch (err) {
     res.status(500).json({ message: "Error fetching report" });
