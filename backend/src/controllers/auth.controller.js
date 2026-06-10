@@ -1,7 +1,7 @@
 const userModel = require('../models/user.model.js');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-// 🚀 INTEGRATED EMAIL UTILITY: Safely handles verification triggers
+
 const { sendVerificationEmail } = require('../middlewares/email.config.js');
 
 async function registerUser(req, res) {
@@ -18,7 +18,6 @@ async function registerUser(req, res) {
 
         const hash = await bcrypt.hash(password, 10);
 
-        // 🚀 GENERATE 6-DIGIT CODE: Creates the numeric validation string
         const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
 
         const user = await userModel.create({
@@ -29,7 +28,6 @@ async function registerUser(req, res) {
             verificationToken  // Saved securely to compare against frontend input
         });
 
-        // 🚀 SEND EMAIL: Triggers Nodemailer with the newly generated code
         try {
             await sendVerificationEmail(user.email, verificationToken);
         } catch (emailError) {
