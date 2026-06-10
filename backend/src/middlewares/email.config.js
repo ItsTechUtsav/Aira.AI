@@ -1,40 +1,15 @@
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 10000,
-  tls: {
-    rejectUnauthorized: true,
-  },
-});
-
-transporter.verify((error, success) => {
-  if (error) {
-    console.error(" SMTP VERIFY FAILED:", error);
-  } else {
-    console.log(" SMTP READY");
-  }
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendVerificationEmail = async (email, verificationToken) => {
   try {
     console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    console.log(" sendVerificationEmail called");
-    console.log(" To:", email);
-    console.log(" SMTP_USER exists:", !!process.env.SMTP_USER);
-    console.log(" SMTP_PASS exists:", !!process.env.SMTP_PASS);
-    console.log(" Preparing email send...");
+    console.log("sendVerificationEmail called");
+    console.log("To:", email);
 
-    const mailOptions = {
-      from: `"Aira.AI" <${process.env.SMTP_USER}>`,
+    const response = await resend.emails.send({
+      from: "onboarding@resend.dev",
       to: email,
       subject: "Verify your Aira.AI Account",
       html: `
@@ -72,27 +47,19 @@ const sendVerificationEmail = async (email, verificationToken) => {
           </p>
         </div>
       `,
-    };
+    });
 
-    console.log("📡 Calling transporter.sendMail()...");
+    console.log("EMAIL SENT");
+    console.log(response);
 
-    const info = await transporter.sendMail(mailOptions);
-
-    console.log(" EMAIL SENT SUCCESSFULLY");
-    console.log(" Response:", info.response);
-    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━");
-
-    return info;
+    return response;
   } catch (error) {
-    console.error("━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    console.error(" EMAIL SEND FAILED");
+    console.error("EMAIL SEND FAILED");
     console.error(error);
-    console.error("━━━━━━━━━━━━━━━━━━━━━━━━━━");
     throw error;
   }
 };
 
 module.exports = {
-  transporter,
   sendVerificationEmail,
 };
