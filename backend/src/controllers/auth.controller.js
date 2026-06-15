@@ -1,293 +1,271 @@
-const userModel = require('../models/user.model.js');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
+const userModel = require("../models/user.model.js");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 
 async function registerUser(req, res) {
-try {
-const { username, email, password } = req.body;
+  try {
+    const { username, email, password } = req.body;
 
-```
-const isUserExist = await userModel.findOne({
-  $or: [{ username }, { email }]
-});
+    const isUserExist = await userModel.findOne({
+      $or: [{ username }, { email }],
+    });
 
-if (isUserExist) {
-  return res.status(409).json({
-    message: "User already exists"
-  });
-}
+    if (isUserExist) {
+      return res.status(409).json({
+        message: "User already exists",
+      });
+    }
 
-const hash = await bcrypt.hash(password, 10);
+    const hash = await bcrypt.hash(password, 10);
 
-const user = await userModel.create({
-  username,
-  email,
-  password: hash,
-  isVerified: true
-});
+    const user = await userModel.create({
+      username,
+      email,
+      password: hash,
+      isVerified: true,
+    });
 
-const token = jwt.sign(
-  { id: user._id },
-  process.env.JWT_SECRET
-);
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET
+    );
 
-res.cookie('token', token);
+    res.cookie("token", token);
 
-res.status(201).json({
-  message: "User registered successfully",
-  token,
-  user: {
-    id: user._id,
-    username: user.username,
-    email: user.email,
-    isVerified: user.isVerified
+    return res.status(201).json({
+      message: "User registered successfully",
+      token,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        isVerified: user.isVerified,
+      },
+    });
+  } catch (error) {
+    console.error("Registration error:", error);
+    return res.status(500).json({
+      message: "Server error during registration",
+    });
   }
-});
-```
-
-} catch (error) {
-console.error("Registration error:", error);
-res.status(500).json({
-message: "Server error during registration"
-});
-}
 }
 
 async function loginUser(req, res) {
-try {
-const { username, email, password } = req.body;
+  try {
+    const { username, email, password } = req.body;
 
-```
-const user = await userModel.findOne({
-  $or: [
-    { username },
-    { email }
-  ]
-});
+    const user = await userModel.findOne({
+      $or: [{ username }, { email }],
+    });
 
-if (!user) {
-  return res.status(404).json({
-    message: "User not found"
-  });
-}
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
 
-const isPasswordValid = await bcrypt.compare(
-  password,
-  user.password
-);
+    const isPasswordValid = await bcrypt.compare(
+      password,
+      user.password
+    );
 
-if (!isPasswordValid) {
-  return res.status(401).json({
-    message: "Invalid password"
-  });
-}
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        message: "Invalid password",
+      });
+    }
 
-const token = jwt.sign(
-  { id: user._id },
-  process.env.JWT_SECRET
-);
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET
+    );
 
-res.cookie('token', token);
+    res.cookie("token", token);
 
-res.status(200).json({
-  message: "User logged in successfully",
-  token,
-  user: {
-    id: user._id,
-    username: user.username,
-    email: user.email,
-    isVerified: user.isVerified
+    return res.status(200).json({
+      message: "User logged in successfully",
+      token,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        isVerified: user.isVerified,
+      },
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+
+    return res.status(500).json({
+      message: "Server error during login",
+    });
   }
-});
-```
-
-} catch (error) {
-console.error(error);
-res.status(500).json({
-message: "Server error during login"
-});
-}
 }
 
 async function getMe(req, res) {
-try {
-const authHeader = req.headers.authorization;
+  try {
+    const authHeader = req.headers.authorization;
 
-```
-if (!authHeader || !authHeader.startsWith("Bearer ")) {
-  return res.status(401).json({
-    message: "Unauthorized"
-  });
-}
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({
+        message: "Unauthorized",
+      });
+    }
 
-const token = authHeader.split(" ")[1];
+    const token = authHeader.split(" ")[1];
 
-const decoded = jwt.verify(
-  token,
-  process.env.JWT_SECRET
-);
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET
+    );
 
-const user = await userModel
-  .findById(decoded.id)
-  .select("-password");
+    const user = await userModel
+      .findById(decoded.id)
+      .select("-password");
 
-res.json(user);
-```
-
-} catch (error) {
-res.status(401).json({
-message: "Invalid token"
-});
-}
+    return res.json(user);
+  } catch (error) {
+    return res.status(401).json({
+      message: "Invalid token",
+    });
+  }
 }
 
 async function changeUsername(req, res) {
-try {
-const { username } = req.body;
+  try {
+    const { username } = req.body;
 
-```
-if (!username) {
-  return res.status(400).json({
-    message: "Username is required"
-  });
-}
+    if (!username) {
+      return res.status(400).json({
+        message: "Username is required",
+      });
+    }
 
-const user = await userModel.findById(req.userId);
+    const user = await userModel.findById(req.userId);
 
-if (!user) {
-  return res.status(404).json({
-    message: "User not found"
-  });
-}
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
 
-user.username = username;
-await user.save();
+    user.username = username;
+    await user.save();
 
-res.json({
-  message: "Username updated successfully",
-  username: user.username
-});
-```
-
-} catch (err) {
-res.status(500).json({
-message: "Server error"
-});
-}
+    return res.json({
+      message: "Username updated successfully",
+      username: user.username,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Server error",
+    });
+  }
 }
 
 async function verifyPassword(req, res) {
-try {
-const { oldPassword } = req.body;
+  try {
+    const { oldPassword } = req.body;
 
-```
-if (!oldPassword) {
-  return res.status(400).json({
-    message: "Password is required"
-  });
-}
+    if (!oldPassword) {
+      return res.status(400).json({
+        message: "Password is required",
+      });
+    }
 
-const user = await userModel.findById(req.userId);
+    const user = await userModel.findById(req.userId);
 
-if (!user) {
-  return res.status(404).json({
-    message: "User not found"
-  });
-}
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
 
-const isMatch = await bcrypt.compare(
-  oldPassword,
-  user.password
-);
+    const isMatch = await bcrypt.compare(
+      oldPassword,
+      user.password
+    );
 
-if (!isMatch) {
-  return res.status(400).json({
-    message: "Incorrect password"
-  });
-}
+    if (!isMatch) {
+      return res.status(400).json({
+        message: "Incorrect password",
+      });
+    }
 
-res.json({
-  message: "Password verified"
-});
-```
-
-} catch (err) {
-res.status(500).json({
-message: "Server error"
-});
-}
+    return res.json({
+      message: "Password verified",
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Server error",
+    });
+  }
 }
 
 async function changePassword(req, res) {
-try {
-const { newPassword } = req.body;
+  try {
+    const { newPassword } = req.body;
 
-```
-if (!newPassword) {
-  return res.status(400).json({
-    message: "New password required"
-  });
-}
+    if (!newPassword) {
+      return res.status(400).json({
+        message: "New password required",
+      });
+    }
 
-const user = await userModel.findById(req.userId);
+    const user = await userModel.findById(req.userId);
 
-if (!user) {
-  return res.status(404).json({
-    message: "User not found"
-  });
-}
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
 
-const hashedPassword = await bcrypt.hash(
-  newPassword,
-  10
-);
+    const hashedPassword = await bcrypt.hash(
+      newPassword,
+      10
+    );
 
-user.password = hashedPassword;
-await user.save();
+    user.password = hashedPassword;
 
-res.json({
-  message: "Password updated successfully"
-});
-```
+    await user.save();
 
-} catch (err) {
-res.status(500).json({
-message: "Server error"
-});
-}
+    return res.json({
+      message: "Password updated successfully",
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Server error",
+    });
+  }
 }
 
 async function deleteAccount(req, res) {
-try {
-const user = await userModel.findById(req.userId);
+  try {
+    const user = await userModel.findById(req.userId);
 
-```
-if (!user) {
-  return res.status(404).json({
-    message: "User not found"
-  });
-}
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
 
-await userModel.findByIdAndDelete(req.userId);
+    await userModel.findByIdAndDelete(req.userId);
 
-res.json({
-  message: "Account deleted successfully"
-});
-```
-
-} catch (err) {
-res.status(500).json({
-message: "Server error"
-});
-}
+    return res.json({
+      message: "Account deleted successfully",
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Server error",
+    });
+  }
 }
 
 module.exports = {
-registerUser,
-loginUser,
-getMe,
-changeUsername,
-changePassword,
-deleteAccount,
-verifyPassword
+  registerUser,
+  loginUser,
+  getMe,
+  changeUsername,
+  changePassword,
+  deleteAccount,
+  verifyPassword,
 };
