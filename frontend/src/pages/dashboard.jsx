@@ -124,15 +124,15 @@ export default function Dashboard() {
 
           <div
             onClick={() => handleSafeNavigate("/settings")}
-            className="flex items-center gap-3 bg-white/[0.02] border border-white/[0.04] pl-3 pr-1 py-1 rounded-xl cursor-pointer hover:bg-white/[0.05] transition group"
+            className="flex items-center gap-3 bg-white/[0.02] border border-white/[0.04] pl-3 pr-1 py-1 rounded-xl cursor-pointer hover:bg-white/[0.05] transition group hover:shadow-md hover:shadow-indigo-600/30"
           >
             <div className="text-right">
-              <p className="text-xs font-semibold text-white group-hover:text-indigo-400 transition leading-none">
+              <p className="text-xs font-semibold text-white  transition leading-none">
                 {userData.username}
               </p>
 
-              <span className="text-[10px] uppercase font-bold text-indigo-400 tracking-wider">
-                Premium Tier
+              <span className="text-[10px] uppercase font-bold text-indigo-400 tracking-wider group-hover:text-white">
+                Free Tier
               </span>
             </div>
 
@@ -170,7 +170,10 @@ export default function Dashboard() {
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Total Interviews */}
-          <div className="bg-[#0e1326] border border-white/[0.04] p-5 rounded-2xl flex items-center justify-between">
+          <div 
+          disabled={isNavigating}
+          onClick={() => handleSafeNavigate("/analytics")}
+          className="bg-[#0e1326] border border-white/[0.04] p-5 rounded-2xl flex items-center justify-between cursor-pointer hover:shadow-md hover:shadow-indigo-600/30">
             <div>
               <p className="text-[10px] text-gray-500 uppercase font-semibold tracking-wider">
                 Completed Mock Interviews
@@ -191,7 +194,10 @@ export default function Dashboard() {
           </div>
 
           {/* Average Score */}
-          <div className="bg-[#0e1326] border border-white/[0.04] p-5 rounded-2xl flex items-center justify-between">
+          <div 
+          disabled={isNavigating}
+          onClick={() => handleSafeNavigate("/analytics")}
+          className="bg-[#0e1326] border border-white/[0.04] p-5 rounded-2xl flex items-center justify-between cursor-pointer hover:shadow-md hover:shadow-indigo-600/30">
             <div>
               <p className="text-[10px] text-gray-500 uppercase font-semibold tracking-wider">
                 Current Average Performance
@@ -212,7 +218,10 @@ export default function Dashboard() {
           </div>
 
           {/* Pending */}
-          <div className="bg-[#0e1326] border border-white/[0.04] p-5 rounded-2xl flex items-center justify-between">
+          <div 
+          disabled={isNavigating}
+          onClick={() => handleSafeNavigate("/analytics")}
+          className="bg-[#0e1326] border border-white/[0.04] p-5 rounded-2xl flex items-center justify-between cursor-pointer hover:shadow-md hover:shadow-indigo-600/30">
             <div>
               <p className="text-[10px] text-gray-500 uppercase font-semibold tracking-wider">
                 Pending Interviews
@@ -249,7 +258,7 @@ export default function Dashboard() {
 
                 <button
                   onClick={() => handleSafeNavigate("/history")}
-                  className="text-xs text-indigo-400 hover:text-indigo-300 transition flex items-center gap-1 font-medium"
+                  className="text-xs text-indigo-400 hover:text-indigo-300 transition flex items-center gap-1 font-medium cursor-pointer"
                 >
                   Full History <ChevronRight size={14} />
                 </button>
@@ -392,7 +401,7 @@ export default function Dashboard() {
             <button
               disabled={isNavigating}
               onClick={() => handleSafeNavigate("/practice")}
-              className="bg-white text-indigo-700 hover:bg-indigo-50 px-4 py-2.5 rounded-xl font-semibold text-xs transition-all w-full flex items-center justify-center gap-1.5 mt-4 shadow-md disabled:opacity-50"
+              className="bg-white text-indigo-700 hover:bg-indigo-50 px-4 py-2.5 rounded-xl font-semibold text-xs transition-all w-full flex items-center justify-center gap-1.5 mt-4 shadow-md disabled:opacity-50 cursor-pointer"
             >
               <PlayCircle size={14} />
               Start Session

@@ -16,6 +16,14 @@ async function registerUser(req, res) {
       });
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        message: "Please enter a valid email address"
+      });
+    }
+
     const hash = await bcrypt.hash(password, 10);
 
     const user = await userModel.create({
