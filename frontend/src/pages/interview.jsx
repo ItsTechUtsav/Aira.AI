@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import interviewerImg from "../assets/interviewer.png";
 import {
   Mic,
   Video,
@@ -421,17 +422,17 @@ const InterviewPage = () => {
 
           <div className="relative flex-1 bg-[#0b0e1a] rounded-3xl border border-[#1f293a] overflow-hidden shadow-2xl flex items-center justify-center group">
 
-            <div className="text-center">
+           <img
+  src={interviewerImg}
+  alt="AI Interviewer"
+  className="w-full h-full object-cover"
+/>
 
-              <div className="w-20 h-20 bg-indigo-500/10 rounded-full flex items-center justify-center mx-auto mb-4 ring-1 ring-indigo-500/30">
-                <Video size={32} className="text-indigo-500" />
-              </div>
-
-              <p className="text-gray-500 font-medium italic">
-                AI Interviewer is active...
-              </p>
-
-            </div>
+<div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur-md px-4 py-2 rounded-xl">
+  <p className="text-white font-medium">
+    AI Interviewer is active...
+  </p>
+</div>
 
             <div className="absolute top-6 left-6 flex items-center gap-2 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10">
               <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
