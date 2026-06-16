@@ -19,14 +19,10 @@ app.use(cookieParser());
 app.use('/api/auth', authRoutes);
 app.use('/api/interview', interviewRoutes);
 
-// 404 handler (safe, no wildcard crash)
-app.use('/api/auth', authRoutes);
-app.use('/api/interview', interviewRoutes);
 
-// Serve frontend build
-app.use(express.static(path.join(process.cwd(), 'public')));
-
-app.use((req, res) => {
-  res.sendFile(path.join(process.cwd(), 'public', 'index.html'));
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Aira AI Backend Running'
+  });
 });
 module.exports = app;
