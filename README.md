@@ -134,5 +134,7 @@ npm run dev
 
 ## Contributors
 Krishna Krishnatrey(FUll Stack Developer)
-Shamit Gautam(Motivation Engg.)
+
+Shamit Gautam(AI Application Developer)
+
 Utsav Sharma(DevOps Engg.)
